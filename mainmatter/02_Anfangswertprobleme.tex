@@ -1,0 +1,713 @@
+\chapter{Numerische Lösung von Anfangswertproblemen} 
+
+Im Folgenden wollen wir uns mit der numerischen Lösungen von Anfangwertproblemen für gewöhnliche Differentialgleichungen der Form 
+\begin{equation}
+u'(t) = \frac{du}{dt} = F(t,u(t)), \quad u(0) = u_0 \label{eq:awp}
+\end{equation}
+
+beschäftigen, wobei $F: \mathbb{R}_+ \times \mathbb{R}^n \rightarrow \mathbb{R}^n$ eine gegebene stetige Funktion ist. Solche Modelle treten in vielen Anwendungen auf, die Modellierung mit Differentialgleichungen ist oft kanonisch, da man nur verstehen muss wie sich eine Größe in hinreichend kleiner Zeit ändern wird, d.h. wir schreiben
+
+\begin{equation*}
+u(t+\Delta t)  \approx u(t) + \Delta t F(t,u(t)) ,
+\end{equation*}
+
+wobei der Unterschied zur Exaktheit in dieser Relation dann von höherer Ordnung in $\Delta t$ sein kann. Im Grenzwert $\Delta t \rightarrow 0$ erhalten wir dann die Differentialgleichungen.  Ein einfaches Beispiel für ein Anfangswert sind die Newton'schen Bewegungsgleichungen, die wir als die Gesetze
+
+\begin{itemize}
+\item Geschwindigkeit ist Änderung des Orts pro Zeit,
+\item Beschleunigung ist Änderung der Geschwindigkeit pro Zeit,
+\item Kraft ist Masse mal Beschleunigung,
+\end{itemize}
+
+kennen. Ist $x(t)$ der Ort eines Teilchens zur Zeit $t$, $v(t)$ seine Geschwindigkeit und $a(t)$ die Beschleunigung. Dann gilt
+$$ v(t) = \frac{dx}{dt}(t), \quad a(t) =  \frac{dv}{dt}(t), \quad m a(t) = F(x(t),v(t),t). $$
+Diese Gesetze können wir auch als Differentialgleichungen für $x$ und $v$ (oder den Impuls $p(t)=m v(t)$) lesen, wenn wir $a$ eliminieren, es gilt dann
+$$ \frac{d}{dt} (x(t),v(t)) = (v(t), F(x(t),v(t),t)). $$
+Kennen wir den Anfangsort $x(0)$ und die Anfangsgeschwindigkeit $v(0)$, so haben wir ein Anfangswert für ein System von Differentialgleichungen (im $\mathbb{R}^3$ insgesamt sechs Gleichungen für sechs Unbekannte). In gro{\ss}en Systemen von Teilchen hat man dann Gleichungen für jede Position $x_i$ und die Geschwindigkeiten $v_i$, $i=1,\ldots,N$, mit 
+ $$ \frac{d}{dt} (x_i(t),v_i(t))_{i=1,\ldots,N} = (v_i(t), F(x_1(t),v_1(t), \ldots x_N(t),v_N(t),t)). $$
+Zur Beschreibung realer Vorgänge mit vielen Teilchen (Moleküle, Zellen, Tiere in Herden, Fussgänger, Autos ...) erhält man also schnell beliebig komplexe Systeme von Differentialgleichungen. Unser Ziel in diesem Kapitel ist es die numerische Lösung solcher Differentialgleichungen zu untersuchen, zuvor klären wir aber noch einige Grundlagen der gewöhnlichen Differentialgleichungen um diese auch vernünftig verstehen zu können.
+
+
+\section{Theorie von Anfangswertproblemen für gewöhnliche Differentialgleichungen}
+
+Wir diskutieren im Folgenden kurz einige theoretische Aspekte gewöhnlicher Differentialgleichungen. Wir beginnen mit einer allgemeinen Theorie der Existenz und Eindeutigkeit. Grundlage dafür ist eine Umformulierung in eine Fixpunktform, sodass wir dann einfach einen passenden Fixpunktsatz anwenden können. Ist $u \in C^1([0,T])$ eine Lösung des Anfangswertproblems \eqref{eq:awp}, dann gilt aus dem Hauptsatz der Integralrechnung auch
+$$ u(t) = u_0 + \int_0^t F(s,u(s)) ~ds , \qquad 0 \leq s \leq T. $$
+Dies können wir als Fixpunktgleichung $u= {\cal F}(u)$  in einem Banachraum interpretieren. Dafür können wir zwei Arten von Fixpunktsätzen anwenden: die erste Art (Satz von Browder, Schauder oder andere Varianten) basiert auf Kompaktheit, d.h. wenn man Funktionen $u$ in den Operator reinsteckt sind diese topologisch danach in einer schöneren Menge. Insbesondere hat diese Menge dann einen Fixpunkt. In unserem Fall entsteht die Kompaktheit aus dem Satz von Arzela-Ascoli, man kann zeigen, dass für $u_n$ beschränkt die Folge ${\cal F}(u_n)$ immer eine konvergente Teilfolge hat. Dies liefert den sogenannten Satz von Peano, der die Existenz einer Lösung für stetiges $F$ garantiert. Da man hier recht abstrakt und über Teilfolgen argumentiert, hat man keine Chance die Eindeutigkeit eines Fixpunkts nachzuweisen. 
+
+Die zweite Art an Beweisen basiert eigentlich immer auf dem Banach'schen Fixpunktsatz, den wir hier näher diskutieren wollen. Dazu beachten wir, dass falls $F$ im zweiten Argument Lipschitz-stetig ist (mit Modul $L$), folgendes gilt 
+
+\begin{align*} 
+\Vert {\cal F}(u_1) - {\cal F}(u_2) \Vert_\infty &= \max_{0 \leq t \leq T} \vert \int_0^t F(s,u_1(s)) - F(s,u_2(s)) ~ds \vert \\
+&\leq  \max_{0 \leq t \leq T} \int_0^t \vert  F(s,u_1(s)) - F(s,u_2(s))\vert  ~ds  \\ &\leq  L T  \max_{0 \leq s \leq T} \vert u_1(s) - u_2(s) \vert = L T \Vert u_1 - u_2 \Vert_\infty. 
+\end{align*}
+
+Wir erkennen daraus, dass die Abbildung ${\cal F}:C([0,T]) \rightarrow C([0,T])$ kontraktiv ist, wenn $T$ klein genug ist, da dann immer $L T < 1 $ ist. Damit liefert der Banach'sche Fixpunktsatz die Existenz und Eindeutigkeit einer Lösung in $C([0,T])$ für $T$ hinreichend klein. Da $u$ dann die Stammfunktion der stetigen Funktion $t \mapsto F(t,u(t))$ ist, gilt auch $u \in C^1([0,T])$.  Dies ist die erste Version des Satzes von Picard-Lindelöf, die uns die Existenz und Eindeutigkeit für kleine Zeiten liefert. Wir sehen dabei schon einige typische Techniken bei der Behandlung von gewöhnlichen und partiellen Differentialgleichungen: erst formulieren wir das Problme um, sodass weniger oder keine Ableitungen mehr vorkommen und zeigen die Existenz / Eindeutigkeit einer Lösung in einem gr{ö}{\ss}eren Raum (hier die stetigen Funktionen). Danach beweisen wir zusätzliche Regularität der Lösung, in unseerem Fall stetige Differenzierbarkeit. Wir beachten, dass wenn $F$ k-mal stetig differenzierbar in beiden Variablen ist, eine Iteration des obigen Arguments sogar liefert, dass $u$ $k+1$-mal stetig differenzierbar ist. Auch die Analyse in kleinen Zeiten ist ein typisches Vorgehen für Anfangswertprobleme. 
+
+In unserem Fall können wir aber ein besseres Resultat erreichen, in dem wir einfach die Norm passend wählen. Die Idee dazu liefert zunächst die einfache Gleichung
+$$ u'(t) = L u(t) $$
+mit $L > 0$. Ist $u$ eine positive Lösung, dann folgt mit der Kettenregel
+$$ \frac{d}{dt} \log u(t) = L. $$
+Dies können wir integrieren zu 
+$$ \log u(t) - \log u(0) = L t $$
+und auflösen als 
+$$ u(t) = u_0 e^{Lt}. $$
+In diesem Fall ist trivialerweise $L$ die Lipschitzkonstante von $F$ und wir sehen, dass wir dann ein exponentielles Wachstum mit $e^{Lt}$ erwarten müssen. Dies ist auch allgemein der Fall, wie das folgende Lemma von Gronwall zeigt:
+ 
+\begin{lemma}{}{}
+Sei $v(t)$ eine nichtnegative stetige Funktion, die 
+$$ v(t) \leq a + \int_0^t b v(s)~dx, \qquad \forall 0 \leq t \leq T$$
+mit $a > 0$ und $b \in \mathbb{R}$ erfüllt. Dann gilt 
+$$ v(t) \leq a e^{bt}, \forall 0 \leq t \leq T.$$
+\end{lemma}
+
+\begin{proof}
+Wir definieren $w(t) = e^{-bt} v(t) - a$, dann gilt 
+$$ w(t) \leq a (e^{-bt}-1)+ \int_0^t e^{b(s-t)} b (w(s)+a)~ds = \int_0^t b w(s)~ds. $$
+Aus der Ungleichung bei $t=0$ folgt $w(0) \leq 0$. Sei $T_0$ die maximale Zeit zu der $w(t) \leq 0$ für alle $t \leq T_0$ gilt. Ist $T_0=T$, so sind wir fertig. Ist $T_0 < T$, so gibt es ein hinreichend kleines Zeitintervall $(T_0,T_0+\delta)$, in dem $w$ positiv ist. Dann folgt für $t$ in diesem Intervall
+$$ w(t) \leq \int_{T_0}^t b w(s) ~ds \leq \delta b \max_{T_0 \leq s \leq T_0 + \delta} w(s) $$ 
+und damit auch 
+$$   \max_{T_0 \leq t \leq T_0 + \delta} w(t)  \leq \delta b \max_{T_0 \leq s \leq T_0 + \delta} w(s) . $$
+Für $\delta b < 1$ ist dies aber ein Widerspruch zur Positivität von $w$. Also muss $w(t) \leq 0$ und damit $u(t) \leq a e^{bt}$ für alle $t$ gelten.
+\end{proof}
+
+Wenden wir das Ergebnis auf eine Differentialgleichung mit Lipschitz-stetigem $F$ an, so folgt
+ 
+\begin{align*}
+\vert u(t) -u_0 \vert \leq \int_0^t \vert F(t,u(t)) - F(t,u_0) \vert ~dt + T \max_{0 \leq t \leq T} \vert F(t,u_0)\vert \leq L 
+\int_0^t \vert u(t) - u_0\vert ~dt + a.
+\end{align*}
+Aus dem Lemma von Gronwall angewandt auf $v(t) = \vert u(t) - u_0 \vert$ und der Dreiecksungleichung sehen wir, dass $u(t)$ höchstens wie $e^{Lt}$ wächst. Dies legt nahe, die folgende gewichtete Norm zu wählen:
+\begin{align*}
+\Vert u \Vert_{\infty,L} := \max_{0 \leq t \leq T} e^{-Lt} \vert u(t) \vert.
+\end{align*}
+
+Da $e^{-Lt}$ nach oben durch eins und nach unten durch $e^{-LT}$ beschränkt ist, ist dies eine äquivalente Norm im Raum der stetigen Funktionen. Wir wiederholen also unsere Abschätzung an den Fixpunktoperator in dieser Norm
+
+ \begin{align*} 
+\Vert {\cal F}(u_1) - {\cal F}(u_2) \Vert_{L,\infty} &= \max_{0 \leq t \leq T}  e^{-Lt}\vert \int_0^t F(s,u_1(s)) - F(s,u_2(s)) ~ds \vert \\
+&\leq  \max_{0 \leq t \leq T} \int_0^t e^{L(s-t)} e^{-Ls} \vert  F(s,u_1(s)) - F(s,u_2(s))\vert  ~ds  \\ &\leq  \int_0^T L e^{-L\tau}~d\tau  \max_{0 \leq s \leq T}  e^{-Ls} \vert u_1(s) - u_2(s) \vert = (1-e^{-LT}) \Vert u_1 - u_2 \Vert_{L,\infty}. 
+\end{align*}
+Der Operator ist nun also kontraktiv für beliebiges $T$, da $1- e^{-LT}$ gilt. Wir haben mit dem Banach'schen Fixpunktsatz also die folgende Version des Satzes von Picard-Lindelöf bewiesen:
+
+\begin{theorem}{}{}
+Sei $F$ stetig und Lipschitzstetig bezüglich der zweiten Variable, dann besitzt das Anfangswertproblem \eqref{eq:awp} genau eine Lösung in $C^1([0,T])$. 
+\end{theorem}
+
+Wir werden sehen, dass wir auch bei numerischen Verfahren ähnliche Aussagen und insbesondere ein Version des Lemma von Gronwall  benötigen werden, um die Stabilität der Verfahren garantieren zu können. Abstrakt gesehen liefert das Lemma von Gronwall eine Stabilitätsaussage für die Differentialgleichung, in endlicher Zeit kann die Norm der Lösung nicht beliebig schnell wachsen. 
+
+Wir betrachten zum Abschluss noch einige spezielle Fälle von gewöhnlichen Differentialgleichungen in denen wir eine explizitere Form der Lösung berechnen können. Die Integration der einfachen linearen Gleichung oben ist ein Spezialfall sogenannter separabler Gleichungen der Form
+
+\begin{align*}
+u'(t) = G(u(t)) H(t).
+\end{align*}
+
+Für skalare Gleichungen, d.h. $u(t) \in \mathbb{R}$, können wir durch $G$ dividieren (vorausgesetzt dieser Term ist ungleich null) und es gilt 
+$$ \frac{u'}{G(u)} = H(t). $$
+Ist $g$ eine Stammfunktion von $\frac{1}G$ und $h$ eine Stammfunktion von $H$, so schreiben wir das als
+$ g'(u) u' = h'$ und integrieren zu  $g(u) = h(t) + c$. Die Integrationskonstante $c$ können wir aus dem Anfangswert mit 
+$c = g(u_0) - h(0)$ berechnen. 
+Damit gilt, vorausgesetzt $g$ ist invertierbar
+$$ u(t) = g^{-1} (h(t) - h(0) + g(u_0)). $$
+%
+Ein wichtiger Fall, der uns auch kanonische Beispiele für numerische Verfahren liefert, sind lineare Gleichungen mit konstanten Koeffizienten, d.h. 
+$$ u'(t) = A u(t) + b(t) $$
+mit einer gegebenen Matrix $A \in \R^{n \times n}.$ Wir betrachten zunächst den homogenen Fall $b=0$. Ist $A$ diagonalisierbar als $A = B{-1} D B$ mit Diagonalmatrix $D$, so können wir analog eine Gleichung für $v = B u$ betrachten, die dann von der Form
+$v'(t) = D v(t)$, d.h. jeder Eintrag erfüllt $v_i'(t) = D_{ii} v_i(t)$ und wir erhalten daraus $v_i(t) = v_i(0) e^{D_{ii}t}.$
+Die Lösung $u$ erhalten wir wieder durch Multiplikation mit $B^{-1}$. Im Fall einer Diagonalmatrix ist es naheliegend die Exponentialfunktion einer Matrix $e^{Dt}$ als die Diagonalmatrix mit den Einträgen $e^{D_{ii}t}$ zu definieren. Wir haben dann
+
+\begin{align*}
+u(t) = B^{-1} e^{Dt} v(0) =  B^{-1} e^{Dt} B u(0) =: e^{At} u(t).
+\end{align*}
+
+Wir bekommen durch Diagonalisieren der Matrix also eine Definition des Matrixexponentials, die dann eine Lösung des Anfangswertproblems liefert. Im Fall einer nicht diagonalisierbaren Matrix ist ein ähnliches Vorgehen über die Jordan'sche Normalform möglich, was hier aber zu weit führen würde.
+
+Ist $b \neq 0$, so können wir die sogenannte Variation der Konstanten benutzen um eine Lösung auszurechnen. Die Idee dabei ist ein Produktansatz $u(t) = e^{At} w(t)$, anstatt der Konstanten in der homogenen Lösung haben wir also jetzt eine Funktion. Dann gilt mit Produktregel
+$$ u'(t) = A e^{At} w(t) + e^{At}w'(t) = Au(t) + e^{At}w'(t), $$
+der Vergleich mit der rechten Seite der Differentialgleichung liefert $e^{At} w'(t) = b(t)$ bzw. $w'(t) = e^{-At} b(t). $
+Um die Lösung zu erhalten müssen wir also nur $e^{-At} b(t)$ aufintegrieren. 
+
+Zum Abschluss betrachten wir noch eine Klasse von Gleichungen, die wir aus dem Gradientenverfahren der Optimierung erhalten, wenn die Schrittweite gegen Null geht. Interpretieren wir die Iterierten $x^k$ als Wert einer Funktion $u$ zur Zeit $t$, dann schreiben wir das Verfahren als
+$$ u(t+\alpha^k ) = u(t) - \alpha^k \nabla F(u(t)), $$
+die Differentialgleichung im Grenzwert ist der sogenannte Gradientenfluss
+$$ u'(t) = - \nabla G(u(t)). $$
+Dieser hat natürlich immer noch eine Abstiegseigenschaft, es gilt 
+$$ G(u)' =   \nabla G(u) u' = - \Vert \nabla G(u) \Vert^2 = - \Vert u'\Vert^2. $$ 
+Damit haben wir immer eine Funktion von $u$, die sogar gleichmässig in der Zeit beschränkt ist, und nicht exponentiell wächst wie die Norm im schlimmsten Fall. Ist $G$ konvex, dann gilt für einen Minimierer $u^*$ sogar
+$$ \frac{d}{dt} \Vert u - u^* \Vert^2 = - a \langle \nabla G(u) - \nabla G(u^*), u - u^* \rangle \leq 0, $$
+d.h. die Norm von $u$ ist gleichmä{\ss}ig beschränkt. 
+%
+%\section{Einschrittverfahren für Anfangswertprobleme} 
+%
+%Im Folgenden betrachten wir eine einfache Möglichkeit zur Lösung von gewöhnlichen Differentialgleichungen, wir berechnen einfach sukzessive die Lösung zu verschiedenen Zeitschritten. Der Einfachheit halber wählen wir hier uniforme Zeitschritte $t_k = k \tau$, $k \geq 0$, aber analoges Vorgehen ist auch im nicht-uniformen Fall möglich. Dann können wir sukzessive Approximationen $u_\tau(t_k)$ für die Lösung des Anfangswertproblems zu diesen diskreten Zeitschritten berechnen, indem wir die Ableitung durch Differenzenquotienten zu den diskreten Zeitpunkten approximieren oder eine Quadraturformel an diesen Zeitschritten für die zugehörige Integralgleichung ansetzen. Im Falle eines Einschrittverfahrens verwenden wir dabei eine Differenzenformel, die nur einen Schritt weit geht, d.h. zur Berechnung von $u_\tau(t_{k+1})$ wird nur $u_\tau(t_k)$ verwendet. 
+%
+%Das einfachste Beispiel eines Einschrittverfahrens ist das Vorwärts-Euler Verfahren 
+%\begin{equation}
+%u_\tau(t_{k+1}) = u_\tau(t_k) + \tau F(t_k,u_\tau(t_k)), 
+%\end{equation}
+%ein wenig komplizierter ist schon das Rückwärts-Euler Verfahren
+%\begin{equation}
+%u_\tau(t_{k+1}) = u_\tau(t_k) + \tau F(t_{k+1},u_\tau(t_{k+1})), 
+%\end{equation}
+%bei dem wir eine Gleichung für den neuen Zeitschritt lösen müssen. Insgesamt sind Einschrittverfahren von der Form
+%\begin{equation}
+%u_\tau(t_{k+1}) = u_\tau(t_k) + \tau f_\tau(t_{k},u_\tau(t_{k}),u_\tau(t_{k+1})). 
+%\end{equation}
+%Die Funktion $f_\tau$ wird Verfahrensfunktion genannt. Hängt $f_\tau$ nur von $u_\tau(t_k)$ ab, so hei{\ss}t das Verfahren explizit, da es eine explizite Vorsschrift zur Berechnung des nächsten Zeitschritts liefert. Hängt $f_\tau$  von $u_\tau(t_{k+1})$ ab, so hei{\ss}t das Verfahren implizit, da es nur eine implizite Bedingung (im Allgemeinen eine nichtlineare Gleichung) für den neuen Zeitschritt liefert. Wir betrachten zunächst einige Beispiele:
+%
+%\begin{itemize}
+%\item Das Vorwärts-Euler Verfahren hat die Verfahrensfunktion 
+%$$ f_\tau = F(t_k,u_\tau(t_k)), $$
+%es ist ein explizites Verfahren. In der Integralform bedeutet das, wir approximieren $\int_{t_k}^{t_{k+1}} f(t,u(t))~dt$ durch die Intervallänge mal dem Wert am linken Intervallrand. 
+%
+%\item Das Rückwärts-Euler Verfahren hat die Verfahrensfunktion 
+%$$ f_\tau = F(t_{k+1},u_\tau(t_{k+1})), $$
+%es ist ein implizites Verfahren. In der Integralform bedeutet das, wir approximieren $\int_{t_k}^{t_{k+1}} f(t,u(t))~dt$ durch die Intervallänge mal dem Wert am rechten Intervallrand. 
+%
+%\item Verwenden wir die summierte Trapezregel zur Approximation des Integrals, so erhalten wir das Crank-Nicholson Verfahren mit der Verfahrensfunktion
+%$$ f_\tau = \frac{1}2 (F(t_{k },u_\tau(t_{k }))+F(t_{k+1},u_\tau(t_{k+1}))) . $$
+%Auch dies ist ein implizites Verfahren. 
+%
+%\item Analog zur Optimierung können wir auch Splitting Verfahren betrachten. Ist $F(t,u) = G(t,u)+H(t,u)$, so entspricht das Vorwärts-Rückwärts Splitting der Verfahrensfunktion
+%$$ f_\tau = G(t_{k },u_\tau(t_{k })) + H(t_{k+1},u_\tau(t_{k+1})). $$
+%Auch dies ist ein implizites Verfahren, wenn $H\neq 0$ gilt. Verfahren dieser Art werden oft auch als semi-implizit bezeichnet, wenn $I - \tau H$ einfach zu invertieren ist. Oft wird das Verfahren auch als
+%$$ \tilde u_\tau(t_{k+1}) = u_\tau(t_k) + \tau G(t_{k },u_\tau(t_{k })), \qquad   u_\tau(t_{k+1}) = \tilde u_\tau(t_{k+1}) + \tau 
+%H(t_{k+1},u_\tau(t_{k+1})) $$ 
+%geschrieben, d.h. man führt einen Zeitschritt mit $G$ und einen mit $H$ aus. 
+%\end{itemize} 
+%
+%Wir sehen, dass ein explizites Verfahren sofort wohldefiniert ist, falls $f_\tau$ eine stetige Funktion auf $\mathbb{R}_+ \times \mathbb{R}^n$ ist, während bei impliziten Verfahren noch eine Fixpunktgleichung gelöst werden muss. Die Existenz und Eindeutigkeit dieser Gleichung können wir mit dem Banach'schen Fixpunktsatz garantieren, wenn wiederum $\tau$ klein genug ist.
+%
+%\begin{lemma}
+%Sei $f_\tau$ stetig und Lipschitz-stetig bezüglich $u_\tau(t_{k+1})$ mit Modul $L_2$. Dann existiert für $\tau< \frac{1}{L_2}$ genau eine Lösung $u_\tau(t_{k+1})$ der Fixpunktgleichung
+%$$ u = u_\tau(t_k) + \tau f_\tau(t_k,u_\tau(t_k),u). $$
+%\end{lemma}
+%
+%Numerisch müssen wir zur Durchführung eines impliziten Verfahrens immer noch ein System im $\mathbb{R}^n$ lösen. Ist dieses linear, so können wir die üblichen Verfahren für lineare Gleichungssysteme anwenden. Andernfalls bietet sich die Verwendung eines iterativen Verfahrens wie einer Fixpunktiteration oder des Newton-Verfahrens an (beachte, dass unter der obigen Bedingung $I-\tau f_\tau'$ invertierbar ist für $f_\tau \in C^1$). Mit dem Wert $u_\tau(t_k)$ oder einer einfachen Vorhersage in der Zeit (etwa mit dem expliziten Euler-Verfahren) haben wir dafür auch einen sehr guten Startwert. 
+%
+%Nachdem wir die Wohldefiniertheit und numerische Umsetzung von Einschrittverfahren geklärt habe, widmen wir uns nun der Analyse der Verfahren. Wir wollen dabei den Fehler
+%
+%\begin{equation}\label{eq:einschrittfehler} 
+%E_\tau  = \max_{t_k} \Vert u_\tau(t_k) - u(t_k) \Vert 
+%\end{equation}
+%abschätzen, wobei $u$ die Lösung des Anfangswertproblems ist. Wollen wir dann den Fehler an anderen Stellen $t$ abschätzen, so können wir ein Interpolationsverfahren und die entsprechenden Abschätzungen anwenden. 
+%
+%Unsere Strategie dabei ist die Folgende: Zunächst schreiben wir eine Gleichung für den Fehler $e_\tau = u_\tau - u$. Es gilt
+%
+%\begin{align*} 
+%e_\tau(t_{k+1}) =& e_\tau(t_k) + \tau (f_\tau(t_k,u_\tau(t_k),u_\tau(t_{k+1})) - f_\tau(t_k,u(t_k),u(t_{k+1}))) 
+%+ \\ & \tau ( f_\tau(t_k,u(t_k),u(t_{k+1})) - \frac{1}\tau \int_{t_k}^{t_{k+1}} F(t,u(t))~dt). \end{align*}
+%
+%Nun benötigen wir zwei zentrale Eigenschaften von Diskretisierungsmethoden:
+%
+%\begin{itemize}
+%\item {\em Konsistenz: } Der Fehler auf der rechten Seite 
+%$$ f_\tau(t_k,u(t_k),u(t_{k+1})) - \int_{t_k}^{t_{k+1}} F(t,u(t))~dt,$$
+%d.h. das Residuum der Lösung des Anfangswertproblems eingesetzt in das numerische Verfahren konvergiert gegen Null für $\tau \rightarrow 0$.
+%%
+%\item {\em Stabilität: } Bei der Umsetzung des numerischen Verfahrens mit gegebener rechter Seite wird diese nicht beliebig verstärkt, insbesondere existiert eine Abschätzung unabhängig von $\tau.$ 
+%\end{itemize}
+%
+%Zusammen ergeben Konsistenz und Stabilität Konvergenz des Verfahrens, d.h. $E_\tau \rightarrow 0$. Dies halten wir in einer Definition fest:
+%
+%\begin{definition} 
+%Sei $E_\tau$ definiert durch \eqref{eq:einschrittfehler}, dann heiß}t das Verfahren
+%\begin{itemize}
+%\item konvergent, wenn $E_\tau \rightarrow 0$ für $\tau \rightarrow 0$.
+%%
+%\item konvergent von der Ordnung $p$, wenn $E_\tau = {\cal O}(\tau^p)$ für $\tau \rightarrow 0$, d.h. es gibt eine Konstante $C_p$, sodass $E_\tau \leq C_p \tau^p$ für $\tau$ hinreichend klein. 
+%\end{itemize}
+%\end{definition}
+%
+%\subsection{Konsistenz von Einschrittverfahren} 
+%
+%Gemäß der obigen Motivation definieren wir den Konsistenzfehler als 
+%\begin{equation} \label{eq:konsistenzfehler} 
+%K_\tau = \max_{t_k} \Vert g_\tau(t_k) \Vert 
+%\end{equation}
+%
+%mit 
+%
+%\begin{equation}
+%g_\tau(t_k) = f_\tau(t_k,u(t_k),u(t_{k+1})) - \frac{1}\tau \int_{t_k}^{t_{k+1}} F(t,u(t))~dt,
+%\end{equation}
+%
+%wobei $u$ eine Lösung des Anfangswertproblems \eqref{eq:awp}.
+%
+%\begin{definition} 
+%Sei $K_\tau$ definiert durch \eqref{eq:konsistenzfehler}, dann hei{\ss}t das Verfahren
+%\begin{itemize}
+%\item konsistent, wenn $K_\tau \rightarrow 0$ für $\tau \rightarrow 0$.
+%
+%\item konsistent von der Ordnung $p$, wenn $K_\tau = {\cal O}(\tau^p)$ für $\tau \rightarrow 0$ . 
+%\end{itemize}
+%\end{definition}
+%
+%Die Abschätzung des Konsistenzfehlers erfolgt meist durch Taylorentwicklung, wir führen dies an zwei Beispielen durch:
+%
+%\begin{example}
+%Wir betrachten das Vorwärts-Euler Verfahren unter der Annahme, dass $F$ bezüglich beider Variablen Lipschitz-stetig ist. Definieren wir $\varphi(t) = F(t,u(t))$, dann ist $\varphi$ wegen $u \in C^1$ eine Lipschitz-stetige Funktion und es gilt
+%\begin{align*} \Vert g_\tau(t_k) \Vert &= \Vert \varphi(t_k) - \frac{1}\tau \int_{t_k}^{t_{k+1}} \varphi(t)~dt  \Vert\\
+%&=  \Vert  \frac{1}\tau \int_{t_k}^{t_{k+1}} (\varphi(t_k)-\varphi(t))~dt  \Vert \\
+%&\leq    \frac{1}\tau \int_{t_k}^{t_{k+1}} \Vert \varphi(t_k)-\varphi(t)\Vert~dt   \\
+%&\leq     \frac{1}\tau \int_{t_k}^{t_{k+1}} L_\varphi ( t-t_k)~dt = \frac{L_\varphi}2 \tau.
+%\end{align*}
+%Damit das Verfahren die Konsistenzordnung eins, wir sehen im Beispiel $F(t,u) = t$ auch sofort, dass man im allgemeinen nicht Ordnung zwei erreichen kann. 
+%\end{example}
+%
+%
+%\begin{example}
+%Wir betrachten das Crank-Nicholson Verfahren unter der Annahme, dass $F$ bezüglich beider Variablen zweimal stetig differenzierbar ist. Definieren wir $\varphi(t) = F(t,u(t))$, dann ist $\varphi$  ebenfalls zweimal stetig differenzierbar, da
+%$$ u''(t) = (F(t,u(t)))' = \partial_t F(t,u(t)) + \partial_u F(t,u(t)) u'(t) $$
+%stetig ist. 
+%Damit gilt 
+%\begin{align*} 
+%\Vert g_\tau(t_k) \Vert &= \Vert \frac{1}2(\varphi(t_k)+\varphi(t_{k+1})) - \frac{1}\tau \int_{t_k}^{t_{k+1}} \varphi(t)~dt  \Vert\\
+%&=    \frac{1}{2\tau}  \Vert \int_{t_k}^{t_{k+1}} (\varphi(t_k)+\varphi(t_{k+1})-2\varphi(t))~dt  \Vert \\
+%&\leq    \frac{1}{2\tau}   \Vert\int_{t_k}^{t_{k+1}} \varphi'(t_k)(t_k+t_{k+1}-2t) + r_k ~dt \Vert   ,
+%\end{align*}
+%mit dem Restglied $r_k={\cal O}(\tau^2)$. Da $\int_{t_k}^{t_{k+1}} \varphi'(t_k)(t_k+t_{k+1}-2t) ~dt = 0$, folgt 
+%$ \Vert g_\tau(t_k) \Vert = {\cal O}(\tau^p).$
+%Damit das Verfahren die Konsistenzordnung zwei, wir sehen im Beispiel $F(t,u) = t^2$ auch sofort, dass man im allgemeinen nicht Ordnung zwei erreichen kann. 
+%\end{example}
+%
+%Um eine Konvergenzordnung $p$ zu erhalten, benötigen wir, dass $F$, aber auch $u$ $p$-mal stetig differenzierbar ist. Aus den Eigenschaften von $F$ folgt letzeres aber sofort: wir haben gesehen, dass für $F$ stetig auch $u$ stetig differenzierbar folgt. Mit dem Argument aus dem letzten Beispiel sehen wir, dass für $F$ stetig differenzierbar auch $u$ zweimal stetig differenzierbar ist. Induktiv können wir durch weiteres differenzieren zeigen, dass $u$ $p$-mal stetig differenzierbar ist, wenn $F$ $p-1$-mal stetig differenzierbar ist. 
+%
+%\subsection{Stabilität und Konvergenz}
+%
+%Wir widmen uns nun der Frage der Stabilität von Einschrittverfahren. Dazu zeigen wir zunächst uniforme Schranken an $u_\tau$:
+%\begin{lemma}{}{}
+%Sei $F_\tau$ stetig und Lipschitz-stetig bezüglich des dritten Arguments (d.h. $u_\tau(t_{k+1}$) mit Modul unabhängig von $\tau$. Dann existiert eine Konstante $M(T)$ unabhängig von $\tau$, sodass
+%$$ \max_{t_k \leq T} \Vert u_\tau(t_k) \Vert \leq M $$
+%gilt für alle $\tau$ hinreichend klein.
+%\end{lemma}
+%%
+%\begin{proof}
+%Aus der Definition des Verfahrens folgt 
+%$$ u_\tau(t_{k+1})-u_0 = u_\tau(t_k) - u_0 + \tau (f_\tau(t_k,u_\tau(t_k),u_\tau(t_{k+1}))-f_\tau(t_k,u_0,u_0)) + \tau f_\tau(t_k,u_0,u_0) $$
+%und mit der Dreiecksungleichung folgt für $v_k = \Vert u_\tau(t_k) - u_0 \Vert$
+%
+%\begin{align*} v_{k+1} &\leq v_k + \tau \Vert f_\tau(t_k,u_\tau(t_k),u_\tau(t_{k+1}))-f_\tau(t_k,u_0,u_0) \Vert + \tau \Vert f_\tau(t_k,u_0,u_0) \Vert \\
+%&\leq  v_k + \tau L (v_k + v_{k+1}) + \tau C
+%. \end{align*}
+%Hier haben wir benutzt, dass $f_\tau$ stetig ist, damit folgt $ f_\tau(t,u_0,u_0) $ ist auf dem kompakten Intervall  $[0,T]$ durch eine Konstante $C$ beschränkt. Dazu bezeichnet $L$ den Lipschitz-Modul von $f_\tau$ bezüglich zweitem und drittem Argument. Sei nun $\tau \leq \frac{1}{2L}$, d.h. $1- \tau L \geq \frac{1}2$, dann folgt 
+%$$ v_{k+1} \leq v_k + {\tau L} v_k + 2 \tau C. $$
+%Das diskrete Lemma von Gronwall impliziert dann die Beschränktheit von $v_k$.
+%\end{proof}
+%
+%Mit einem ähnlichen Beweis können wir auch die Stabilität zeigen: 
+%\begin{theorem}Seien $u_\tau$ die Lösung eines Einschrittverfahrens mit Lipschitz-stetiger Verfahrensfunktion $f_\tau$ und $u$ die Lösung des Anfangswertproblems \eqref{eq:awp} mit gleichem Anfangswert $u_0$. Der lokale Konsistenzfehler $g_\tau(t_k)$ und der globale Konsistenzfehler $K_\tau$ seien definiert wie oben. Dann existiert eine Konstante $C$, sodass für $\tau$ hinreichend klein  gilt:
+%$$ E_\tau = \max_{t_k} \Vert u_\tau(t_k) - u(t_k) \Vert \leq C \max_{t_k} \Vert g_\tau(t_k) \Vert = K_\tau. $$
+%\end{theorem}
+%
+%\begin{proof}
+%Wir definieren $v_k = \Vert u_\tau(t_{k+1} - t_k) \Vert$, dann gilt wieder mit Dreiecksungleichung und Lipschitz-Stetigkeit von $f\tau$
+%$$ v_{k+1} \leq v_k + L \tau (v_k + v_{k+1}) + \Vert g_\tau(t_k) \Vert. $$
+%Für $\tau \leq \frac{1}{2L}$ erhalten wir die gewünschte Schranke wieder direkt aus dem diskreten Lemma von Gronwall. $\square$
+%\end{proof}
+
+%Eine direkte Folgerung ist die äquivalenz von Konsistenz und Konvergenz für Einschrittverfahren. 
+%\begin{cor}
+%Für ein Einschrittverfahren mit Lipschitz-stetiger Verfahrensfunktion gilt: ist das Verfahren konsistent (von der Ordnung $p$), so ist es auch konvergent (von der Ordnung $p$).
+%\end{cor}
+%
+%Aus der Abschätzung des Konsistenzfehlers sehen wir nun sofort, dass Vorwärts- und Rückwärts-Euler Verfahren konvergent von der Ordnung eins sind, das Crank-Nicholson Verfahren ist konvergent von der Ordnung zwei. Wir widmen uns im Folgenden noch der Frage wie wir Einschrittverfahren höherer Ordnung konstruieren können. Wie wir gesehen haben reicht dazu die Analyse der Konsistenzordnung, wir müssen also Verfahrensfunktionen konstruieren, sodass die Taylorentwicklung einen Rest höhere Ordnung liefert. Dies ist bei denen sogenannten Runge-Kutta Verfahren der Fall, die wir im Folgenden diskutieren werden.
+%
+%\subsection{Runge-Kutta Verfahren}
+%
+%Bisher haben wir Verfahren kennengelernt, die auf einzelne Funktionsauswertungen an den $t_k$ und $t_{k+1}$ zurückgreifen. Damit haben wir meist die Konsistenzordnung eins erreicht, als maximale Konsistenzordnung zwei beim Crank-Nicholson Verfahren. Eine höhere Konsistenzordnung ist mit so einem Ansatz nicht möglich. Eine erste Möglichkeit zur Steigerung der Ordnung ist es Ableitungen von $F$ bei $t_k$ und $t_{k+1}$ zu berücksichtigen, womit man offensichtlich die Taylor-Entwicklung besser approximieren und eine höhere Ordnung erreichen kann. Die Berechnung von Ableitungen von $F$ ist jedoch potentiell numerisch aufwändig und instabil, deswegen geht man bei Runge-Kutta Verfahren einen anderen Weg und approximiert durch geschachtelte Funktionsauswertungen. Bei einem Runge-Kutta Verfahren der Stufe $s$ berechnet man zunächst
+%$$ f_i^k =  F(t_k + c_i \tau, u_\tau(t_k) + \tau \sum_{j=1}^s a_{ij} f_j^k) $$ 
+%und die Verfahrensfunktion als 
+%$$ f_\tau = \sum_{i=1}^s b_i f_i^k. $$
+%Um sinnvoll in der Zeit vorwärts zu gehen wählt man $c_i$ als aufsteigende Folge und die Matrix $(a_{ij})$ als untere Dreiecksmatrix, im Fall expliziter Verfahren mit Diagonaleinträgen $a_{ii}=0$. Die grobe Idee ist die Approximation des Integrals $\int_{t_k}^{t_{k+1}}$ durch Quadratur an Zwischenpunkten im Intervall $[t_k,t_{k+1}]$. Die $b_i$ sind dann die Gewichte der Quadraturformel und die $f_i^k$ approximieren $F(t_k+c_i\tau,u(t_k + c_i\tau))$. Da wir $u_\tau(t_k+c_i \tau)$ ja nicht kennen, benötigen wir Approximationen dafür, die wir wieder durch eine numerische Approximation der Differentialgleichung im Intervall $[t_k,t_k+c_i\tau]$ erhalten - daher die geschachtelte Funktionsauswertung.
+%
+%Wir beginnen wieder mit den einfachsten Fällen:
+%\begin{example}
+%Für $s=1$ ist die Verfahrensfunktion $b_1 f_1^k$ und
+%$$ f_1^k = F(t_k + c_1 \tau, u_\tau(t_k) +  \tau a_{11} f_1^k). $$
+%Wollen wir ein explizites Verfahren durchführen, so ist $a_{11}=0$, das Verfahren ist also von der Form
+%$f_\tau = b_1 F(t_k+c_1 \tau,  u_\tau(t_k)). $
+%Für Konsistenz sehen wir sofort, dass $b_1=1$ gelten muss, die einzige sinnvolle Wahl für $c_1$ ist null, da wir sonst $F$ zu einer anderen Zeit auswerten als $u$. Also erhalten wir das Vorwärts-Euler Verfahren. Im impliziten Fall können wir eine höhere Ordnung erreichen. Wir berechnen für die Lösung $u$ des Anfangswertproblems
+%$$ f_1^k = F(t_k,u(t_k)) + c_1 \tau \partial_t F(t_k,u(t_k)) + \tau a_11 \partial_u F(t_k,u(t_k)) f_1^k + {\cal O}(\tau^2). $$
+%Setzen wir auf der rechten Seite nochmal die führende Ordnung für $f_1^k$ ein, so folgt
+%$$ f_1^k = F(t_k,u(t_k)) + c_1 \tau \partial_t F(t_k,u(t_k)) + \tau a_11   \partial_u F(t_k,u(t_k)) F(t_k,u(t_k))+ {\cal O}(\tau^2). $$
+%Andererseits ist 
+%$$ \frac{1}\tau \int_{t_k}^{t_{k+1}} F(t,u(t)) ~dt = F(t_k,u(t_k)) + \frac{\tau}2 \partial_t F(t_k,u(t_k)) + \frac{\tau}2 \partial_u F(t_k,u(t_k)) F(t_k,u(t_k)) + {\cal O}(\tau^2). $$
+%Ein Vergleich der beiden Formeln zeigt, dass wir Ordnung zwei erreichen, wenn $b_1 =1$, $c_1=\frac{1}2$ und $a_{11}=\frac{1}2$ gilt. Die Verfahrensfunktion ist also gegeben durch die Lösung von
+%$$ f_1^k = F(t_k +\frac{\tau}2,u_\tau(t_k) + \frac{\tau}2 f_1^k). $$ 
+%Wir können dieses zweistufige Runge-Kutta Verfahren als eine Mittelpunktsregel im Intervall $(t_k,t_{k+1})$ interpretieren, wobei der unbekannte Wert von $u_\tau$ am Mittelpunkt $t_k +\frac{\tau}2$ durch das Rückwärts-Euler-Verfahren bestimmt wird.
+%\end{example} 
+%
+%\begin{example}
+%Für $s=2$ ist die Verfahrensfunktion $b_1 f_1^k +b_2 f_2^k$ , wobei im expliziten Fall
+%$$ f_1^k = F(t_k + c_1 \tau, u_\tau(t_k)), \quad f_2^k = F(t_k + c_2 \tau, u_\tau(t_k) +  \tau a_{21} f_1^k). $$
+%Wieder sehen wir, dass nur $c_1=0$ eine sinnvolle Wahl ist, und eine Taylor-Entwicklung liefert
+%$$  b_1 f_1^k +b_2 f_2^k = (b_1 + b_2) F(t_k , u(t_k)) + b_2 c_2 \tau \partial_t F(t_k , u (t_k)) + 
+%b_2 a_{21} \tau \partial_u F(t_k , u (t_k)) F(t_k , u (t_k)) + {\cal O}(\tau^2). $$
+%Vergleichen wir wieder mit der Taylor-Entwicklung von $\frac{1}\tau \int_{t_k}^{t_{k+1}} F(t,u(t)) ~dt$, so folgt
+%$$ b_1+b_2 = 1, \quad b_2 c_2 =\frac{1}2, \quad b_2 a_{21} =\frac{1}2. $$
+%Eine einfache Lösung ist $b_1=0$, $b_2=1$, $c_2=a_{21} = \frac{1}2$. Dies liefert ein Verfahren der Konsistenzordnung zwei mit der Verfahrensfunktion
+%$$ f_\tau = F(t_k +\frac{\tau}2,u_\tau(t_k) + \frac{\tau}2 F(t_k,u(t_k))). $$ 
+%Wir können dieses zweistufige Runge-Kutta Verfahren als eine Mittelpunktsregel im Intervall $(t_k,t_{k+1})$ interpretieren, wobei der unbekannte Wert von $u_\tau$ am Mittelpunkt $t_k +\frac{\tau}2$ durch das Vorwärts-Euler-Verfahren bestimmt wird.
+%\end{example}
+%
+%Allgemein erhalten wir das Runge-Kutta Schema kodiert durch die Matrix $A$ und die Vektoren $b$, $c$. Diese speichern wir im sogenannten Butcher-Schema
+%$$ \begin{array}{cc} c & A \\ & b^T \end{array}. $$
+%Die Einträge von $A$, $b$, $c$ erhalten wir durch ein lineares Gleichungssystem, wenn wir einerseits das Runge-Kutta Verfahren
+%und andererseits das Integral $\frac{1}\tau \int_{t_k}^{t_{k+1}} F(t,u(t))~dt$ zur gewünschten Taylor-Entwicklung. Wie wir aus dem obigen Beispiel gesehen haben ist die Lösung meist nicht eindeutig, insbesondere bezüglich $c$ benötigen wir vernünftige Kriterien. Am einfachsten ist ein Kriterium für die Konsistenz, da
+%$$ \sum_{i=1}^s b_i f_i^j =  \sum_{i=1}^s b_i F(t_k,u(t_k)) + {\cal O}(\tau) $$ 
+%und 
+%$$ \frac{1}\tau \int_{t_k}^{t_{k+1}} F(t,u(t))~dt = F(t_k,u(t_k)) + {\cal O}(\tau) .$$ 
+%Damit sehen wir:
+%
+%\begin{lemma}
+%Ein Runge-Kutta Verfahren ist genau dann konsistent, wenn $\sum_{i=1}^s b_i = 1$ gilt. 
+%\end{lemma} 
+%
+%Umgekehrt können wir auch die maximale Ordnung eines Runge-Kutta Verfahrens abschätzen:
+%\begin{lemma}
+%Ein $s$-stufiges explizites Runge-Kutta Verfahren sei für alle $F \in C^\infty$ von der Konsistenzordnung $p> 0$. Dann gilt $p \leq s $.
+%\end{lemma} 
+%\noindent {\bf Beweis. } Wir wählen $F(t,u)=u$ mit $u_0=1$, dann gilt  wegen $u=e^t$
+%\begin{align*} \frac{1}\tau \int_{t_k}^{t_{k+1}} F(t,u(t))~dt &= \frac{1}\tau \int_{t_k}^{t_{k+1}} u(t)~dt =  \frac{1}\tau \int_{t_k}^{t_{k+1}}  u(t_k) \sum_{j=0}^p \frac{(t-t_k)^j}{j!}~dt + {\cal O}(\tau^{p+1}) \\ &= \sum_{j=0}^s \frac{(t-t_k)^j}{(j+1)!} + {\cal O}(\tau^{p+1}). \end{align*}
+%Andererseits sehen wir
+%$$ f_1^k  = u(t_k), \quad f_2^k = u(t_k) + \tau a_{21} u(t_k), \quad f_3^k  = u(t_k) + \tau a_{31} u(t_k) + \tau a_{32} u(t_k) +
+%\tau^2 a_{32} a_{21} u(t_k) , \ldots,$$
+%d.h. $f_i^k$ ist ein Polynom vom Grad kleiner gleich $i$ in $\tau$, insgesamt ist $f_\tau$ ein Polynom vom Grad $s-1$. Damit können wir keine höhere Ordnung erreichen, da der Fehler ab der Ordnung $\tau^p$ nicht verschwindet. $\square$
+%
+%Wir sehen andererseits, dass das entstehende Gleichungssystem im Fall $s=p$ immer lösen können, wie in den Beispielen oben bleibt oft eine Nichteindeutigkeit bezüglich der $c_i$. Um diese sinnvoll wählen zu können, haben wir bisher mit Kausalität argumentiert, was bei höherer Ordnung auch nicht eindeutig ist. Ein systematischerer Zugang ist die Invarianz des Verfahrens gegenüber sogenannter Autonomisierung zu fordern. Eine autonome Differentialgleichung ist von der Form $u'(t) = F(u(t))$, wobei die Funktion $F$ nicht explizit von $t$ abhängt. Unser allgemeines Anfangswertproblem \eqref{eq:awp} können wir autonomisieren, d.h. in ein äquivalentes System autonomer Differentialgleichungen für $\tilde u = (u,v)$ umschreiben, nämlich
+%$$ u'(t) = F(v(t),u(t)), \quad v'(t) =1, $$
+%mit den Anfangswerten $u(0)=u_0$, $v(0)=1$. Wir sehen sofort, dass $v(t) =t $ gilt, was die äquivalenz impliziert. Wir nennen diese Transformation Autonomisierung und fordern, dass das numerische Verfahren dagegen invariant ist, d.h. die Anwendung auf das neue System liefert die selbe Lösung $u_\tau(t)$ wie das ursprüngliche Verfahren, und zwar für jedes mögliche $F$. Schreiben wir das Verfahren in beiden Fällen hin, so gilt einmal
+%$$ f_i^k = F(t_k + c_i \tau,u(t_k) + \tau \sum_j a_{ij} f_j^k) $$
+%und andererseits
+%$$ f_i^k = F(v(t_k) + \tau \sum_{j} a_{ij},u(t_k) +  \tau \sum_j a_{ij} f_j^k) , \quad g_i^k =1. $$
+%Da wegen der exakten numerischen Integration der linearen Funktion $t \mapsto t$ immer $v(t_k) = t_k$ gilt, sehen wir, dass die Invarianz gegenüber Autonomisierung äquivalent zu
+%$$ c_i = \sum_j a_{ij} $$
+%ist. Deshalb bestimmen wir die $c_i$ immer aus dieser Gleichung und nur die Einträge $a_{ij}$ aus der Konsistenzbedingung. Damit ist es auch immer möglich ein explizites s-stufiges Runge-Kutta Verfahren der Konsistenzordnung zu konstruieren, im impliziten Fall sogar von der Ordnung $s+1$.
+%
+%\section{Mehrschrittverfahren für Anfangswertprobleme}
+%
+%Im Folgenden betrachten wir Mehrschrittverfahren für Anfangswertprobleme, d.h. zur Berechnung von $u_\tau(t_{k+1})$ verwenden wir auch die Werte bei $t_k, \ldots, t_{k-s+1}$. Wir nennen $s$ die Stufe des Mehrschrittverfahrens, ein Einschrittverfahren wäre dementsprechend von der Stufe eins. Ein einfaches Beispiel erhalten wir aus der Mittelpunktsregel im Intervall $(t_{k-1},t_{k+1})$, d.h.
+%$$ u_{\tau}(t_{k+1}) = u_\tau(t_{k-1}) + 2 \tau   F(t_k,u_\tau(t_k))  , $$
+%ein anderes die Simpson Regel
+%$$ u_{\tau}(t_{k+1}) = u_\tau(t_{k-1}) + \frac{\tau}3 ( F(t_{k+1},u_\tau(t_{k+1}))+ 4 F(t_k,u_\tau(t_k)) + F(t_{k-1},u_\tau(t_{k-1}))).$$
+%Beide sind von der Form
+%\begin{equation} \label{eq:mehrschrittverfahren}
+%\alpha_s u_\tau(t_{j+s}) + \alpha_{s-1} u_\tau(t_{j+s-1})+\ldots+\alpha_0 u_\tau(t_j) = \tau (\beta_s F_{j+s}  + \beta_{s-1}  F_{j+s-1}+\ldots+\beta_0 F_j ) ,
+%\end{equation} 
+%mit der Abkürzung $F_k = F(t_k,u_\tau(t_k))$. Ein solches Verfahren hei{\ss}t lineares Mehrschrittverfahren, diese sind mit Abstand die Gebräuchlichsten und wir werden uns hier darauf einschränken. Damit wir wirklich ein $s$-schritt Verfahren haben, werden wir immer annehmen, dass $\alpha_s \neq 0$ und $|\alpha_0|+|\beta_0|> 0$ gilt.
+%
+%Bei der numerischen Berechnung gehen wir analog wie bei Einschrittverfahren vor, wir müssen nur zusätzlich zu $u_\tau(t_k)$ auch die Werte $u_\tau(t_{k-1}),\ldots,u_\tau(t_{k-s+1}$ speichern. Ein effektiver Unterschied zu Einschrittverfahren sind die Anfangswerte. Um ein Verfahren mit $s>1$ Schritten durchzuführen benötigen wir nicht nur $u_0$, sondern auch $u_\tau(t_1),\ldots,u_\tau(t_{s-1})$. Diese müssen wir durch ein anderes Verfahren, etwa ein Einschrittverfahren, erst berechnen. Dabei müssen wir natürlich drauf achten, dass dieses Verfahren von der selben Konvergenzordnung wie das Mehrschrittverfahren gewählt wird, um diese insgesamt nicht zu verkleinern. 
+%
+%Bei expliziten Verfahren, d.h. $\beta_s = 0$, ist die Wohldefiniertheit der einzelnen Schritte dann klar, im impliziten Fall benötigen wir das übliche Fixpunktargument um die Wohldefiniertheit zu gewährleisten:
+%\begin{lemma}Sei $F$ stetig und bezüglich dem zweiten Argument Lipschitz-stetig mit Modul $L$. Dann existiert eine eindeutige Lösung $u_\tau(t_{j+s})$ von \eqref{eq:mehrschrittverfahren}, falls $\tau < \frac{|\beta_s|}{|\alpha_s|}L$ gilt. 
+%\end{lemma} 
+%
+%Um die Notation zu vereinfachen, definieren wir den Shift-Operator $E_\tau$ für eine zeitabhängige Funktion als
+%$ E_\tau u(t) = u(t+\tau).$ Damit können wir das Mehrschrittverfahren als
+%$$ \alpha_s E_\tau^s u_\tau(t_k)+ \alpha_{s-1} E_\tau^{s-1} u_\tau(t_k) + \ldots \alpha_0 E_\tau^0 u_\tau(t_k) = 
+%\tau( \beta_s E_\tau^s F(t_k,u_\tau(t_k)) + \ldots + \beta_0 E_\tau^0 F(t_k,u_\tau(t_k)))$$
+%schreiben. Definieren wir die Polynome
+%$$ \rho(x) = \sum_{j=0}^s \alpha_j x^j, \quad \sigma(x) = \sum_{j=0}^s \beta_j x^j, $$
+%so haben wir noch kompakter
+%$$ \rho(E_\tau) u_\tau(t_k)  = \tau \sigma(E_\tau) F(t_k,u_\tau(t_k))).$$
+%Wie wir sehen werden können die Eigenschaften des Verfahrens alleine über die Eigenschaften der Polynome $\rho$ und $\sigma$ charakterisiert werden. Wir beachten, dass $\rho$ gem{ä}{\ss} unserer Voraussetzungen immer Grad $s$ hat, während $\sigma$ genau dann Grad $s$ hat, wenn das Verfahren implizit ist. 
+%
+%\subsection{Konsistenz von Mehrschrittverfahren} 
+%
+%Während wir die Konvergenzordnung analog zu Einschrittverfahren definieren können, benötigen wir eine passende Definition für Mehrschrittverfahren. Wir führen dazu den lokalen Konsistenzfehler 
+%$$
+%G_\tau(t) = \vert  \frac{1}\tau \rho(E_\tau) u(t) - \sigma(E_\tau) F(t,u(t)) \vert
+%$$
+%ein und definieren:
+%
+%\begin{definition}
+%Ein lineares Mehrschrittverfahren, hei{\ss}t konsistent, falls
+%$$ K_\tau:=\max_{0 \leq t \leq T-s\tau} G_\tau(t) $$
+%gegen Null konvergiert für $\tau \rightarrow 0$. Das Verfahren hei{\ss}t konsistent von der Ordnung $p$, wenn $K_\tau = {\cal O}(\tau^p)$ für $\tau \rightarrow 0$. 
+%\end{definition}
+%
+%Wir können zunächste ein einfaches Resultat zur Charakterisierung der Konvergenz herleiten:
+%\begin{lemma}
+%Ein lineares Mehrschrittverfahren ist genau dann konsistent von der Ordnung $p$, wenn (mit der Konvention $0^0 =1$)
+%$$   \sum_i \alpha_i i^m =  m \sum_i \beta_i i^{m-1} , \qquad m=0,1,\ldots,p. $$
+%\end{lemma} 
+%\noindent {\bf Beweis. } Wir haben
+%$$ \rho(E_\tau) u(t) = \sum_i \alpha_i u(t) + \sum_i \alpha_i (i\tau) u'(t) + \frac{1}2  \sum_i \alpha_i (i\tau)^2 u''(t) + \ldots $$
+%und
+%$$ \tau \sigma(E_\tau) u(t) = \tau \sum_i \beta_i u'(t)  + \sum_i \alpha_i i\tau^2 u''(t) + \ldots . $$
+%Ein Koeffizientenvergleich liefert das gewünschte Resultat.
+%$\square$
+%
+%Wir sehen also, dass Konsistenz sehr einfach an den Koeffizienten ablesbar ist, bzw. wir auch Gleichungssysteme für die Koeffizienten lösen können. Im Fall $s=1$ bleibt nur $\alpha_0 = - \alpha_1$, wir können diese ohne Beschränkung der Allgemeinheit auf $\alpha_1=1$ und $\alpha_0=-1$ normieren. Um Konsistenzordnung eins zu erreichen, muss $1=\alpha_1=\beta_1+\beta_0$ gelten. Dies beinhaltet u.a. das Vorwärts-Euler Verfahren ($\beta_1=0, \beta_0=1$), das Rückwärts-Euler Verfahren ($\beta_1=1, \beta_0=0$) und da Crank-Nicholson Verfahren ($\beta_1=\frac{1}2, \beta_0=\frac{1}2$). Die Konsistenzbedingungen können wir auch über die ersten $p$ Ableitungen des Polynoms $\rho$ and der Stelle $x=1$ und die ersten $p-1$ Ableitungen des Polynoms $\sigma =1$ schreiben. Die Bedingungen für $m=0$ und $m=1$ sind
+%$$ \rho(1) = 0, \quad \rho'(1) = \sigma(1). $$
+%
+%Für $s=2$ und Konsistenzordnung $2$ haben wir 
+%$$ \alpha_0+\alpha_1+\alpha_2 = 0, \quad \alpha_1+2 \alpha_2 = \beta_0+\beta_1+\beta_2 , \quad \alpha_1+4\alpha_2 = 2\beta_1+4\beta_2. $$
+%Wir sehen, dass die Mittelpunktsregel ($\alpha_0=-1,\alpha_1=0,\alpha_2=1, \beta_0 =\beta_2=0, \beta_2=2$) eine Lösung dieses Systems liefert. Selbst wenn wir $\alpha_2=1$ normieren, können wir noch zwei weitere Gleichung aufstellen um Konsistenzordnung vier zu erreichen, nämlich
+%$$ \alpha_1 + 8 \alpha_2 = 3 \beta_1 + 12\beta_2, \quad \alpha_1 + 16 \alpha_2 = 4 \beta_1 + 32\beta_2. $$
+%Insgesamt können wir für ein $s$-Schritt Verfahren die Konsistenzordnung $2s+1$ erreichen. Natürlich stellt sich dann die Frage, ob wir dann auch Stabilität und damit die gleiche Konvergenzordnung erreichen können.
+%
+%\subsection{Stabilität von Mehrschrittverfahren} 
+%
+%Wir widmen uns im Folgenden der Stabilitätsanalyse von Mehrschrittverfahren und werden sehen, dass diese vor allem von den Eigenschaften des Polynoms $\rho$ abhängt. Dazu müssen wir verstehen, wie die Lösung einer linearen Differenzengleichung der Form
+%$$ \sum_{j=0}^s \alpha_j v_{k+j} = g_k $$
+%mit gegebener rechte Seite $g_k$ aussieht. Wir werden dies über dem Körper der komplexen Zahlen tun, da wir dort die Lösung explizit berechnen können, der reelle Fall ist dann ein Spezialfall.
+%Zunächst sehen wir, dass für $v_0,\ldots,v_{s-1}$ gegeben eine eindeutige Lösung $v_k$ für $k \geq s$ existiert. D.h. der Nullraum des linearen Gleichungssystems hat die Dimension $s$ und wir können ihn durch $s$ Basisvektoren darstellen. Wir suchen also zunächst diese $s$ Basisvektoren als linear unabhängige Lösungen des homogenen Systems. 
+%
+%Zunächst sehen wir, dass wir für jede Nullstelle $\lambda \in \C$ des Polynoms $\rho$ eine Lösung der homogenen Gleichung von der Form
+%$$ v_k = \lambda^k $$
+%konstruieren können, da
+%$$ \sum_i \alpha_i v_{k+i} =  \sum_i \alpha_i \lambda^{k+i} = \lambda^k \rho(\lambda) = 0. $$
+%Hat $\rho$ nur $s$ einfache Nullstellen, so haben wir daraus bereits eine Basis gefunden. Ist $\lambda$ eine doppelte Nullstelle, d.h. es gilt auch $\rho'(\lambda) =0$, so sehen wir, dass auch $v_k = k \lambda^k$ eine homogene Lösung ist,  da
+%$$ \sum_i \alpha_i   v_{k+i} =  \sum_i \alpha_i (k+i) \lambda^{k+i} =  k \lambda^k  \sum_i \alpha_i  \lambda^{i} +
+%\lambda^{k+1}  \sum_i \alpha_i  i\lambda^{i-1}   = k \lambda^k \rho(\lambda) + \lambda^{k+1} \rho'(\lambda)= 0. $$
+%Analog gilt für eine $q$-fache Nullstelle, d.h. $\rho^(i)(\lambda) = 0$ für $i=0,\ldots,q-1$, dass $v_k = k^i \lambda^k$ eine Lösung ist (übung). Sind also $\lambda_1, \ldots, \lambda_r$ die unterschiedlichen Nullstellen und $q_1, \ldots,q_r$ ihre Vielfachheiten mit $q_1+\ldots+q_r = s$, dann haben wir einen vollständige Basis des Nullraums aus solchen Lösungen. D.h. die allgemeine Lösung des homogenen Systems ist von der Form
+%$$ v_k = \sum_{i=1}^r \sum_{j=1}^{q_r} c_{ij} k^{j-1} \lambda_i^k , $$
+%mit Konstanten $c_{ij}$ abhängig von den Anfangswerten $v_0, \ldots, v_{s-1}$. Daraus erhalten wir schon eine Idee für die Stabilität:
+%\begin{itemize}
+%\item Ist $\lambda_i$ eine Nullstelle mit $|\lambda_i|>1$, dann existiert eine Lösung, die mit $k \rightarrow \infty$ divergiert. 
+%
+%\item Ist $\lambda_i$ eine Nullstelle mit $|\lambda_i|=1$ und Vielfachheit grö{\ss}er eins, dann existiert ebenfalls eine divergente Lösung $k \lambda_i^k$. 
+%\end{itemize} 
+%Diese beiden Bedingungen werden Stabilitätskriterium von Dahlquist genannt.
+%Gilt die Umkehrung, d.h. jede Nullstelle ist betragsmä{\ss}ig kleiner eins oder sie hat Betrag eins und einfache Vielfachheit, dann folgt 
+%\begin{align*}\vert v_k \vert &= \left\vert \sum_{i=1}^r \sum_{j=1}^{q_r} c_{ij} k^{j-1} \lambda_i^k \right\vert = 
+%\sum_{i=1}^r \sum_{j=1}^{q_r} |c_{ij}|~ k^{j-1} |\lambda_i|^k  \\
+%&\leq \sum_{i,|\lambda_i|<1}  \sum_{j=1}^{q_r} |c_{ij}|~ k^{j-1} |\lambda_i|^k  + \sum_{i,|\lambda_i|=1}  |c_{i1}| \\
+%&\leq \gamma \sum_{i=1}^r\sum_{j=1}^{q_r} |c_{ij}|,
+%  \end{align*}
+%wobei 
+%$$ \gamma = \max_i \max_j \max_k k^{j-1} |\lambda_i|^k < \infty. $$
+%
+%Um die Stabilität des Verfahrens zu verstehen müssen wir noch das inhomogene Problem verstehen. Bei linearen Mehrschrittverfahren ist $g_k$ eine Linearkombination von Auswertungen von $F$, wenn $F$ Lipschitz-stetig ist können wir wie beim Einschrittverfahren Differenzen abschätzen und damit $g_k$ durch ein Vielfaches des Konsistenzfehlers. Da wir keine analogen Aussagen wie das diskrete Lemma von Gronwall für mehrstufige Differenzenverfahren haben, schreiben wir dieses in ein System von Differenzengleichungen erster Ordnung über. Dazu definieren wir $v_k^j = v_{k-j}$ für $j=0,\ldots,s-1$. Dann gilt 
+%\begin{align*}
+%v_{k+1}^0 &= - \frac{1}{\alpha_s} (\alpha_{s-1} v_k^0 + \ldots + \alpha_0 v^{s-1}_k  - g_k) \\
+%v_{k+1}^j &= v_k^{j-1} \qquad \text{für } j > 1.
+%\end{align*}
+%In Matrixform ist dann
+%$$ V_{k+1} = A V_k + G_k, $$
+%mit den Vektoren
+%$$ V_k = (v_k^0,\ldots,v_k^{s-1})^T, \qquad G_k = (g_k,0,\ldots,0)^T $$
+%und der Matrix 
+%$$ A = \left( \begin{array}{ccccc} -\frac{\alpha_{s-1}}{\alpha_s} & -\frac{\alpha_{s-2}}{\alpha_s} & \ldots & 
+%-\frac{\alpha_{1}}{\alpha_s} & -\frac{\alpha_{0}}{\alpha_s}  \\ 1 & 0 & \ldots & 0 & 0 \\ 0 & 1 & \ldots & 0 & 0 \\
+%\vdots & \vdots & \ddots & \vdots & \vdots \\ 0 & 0 & \ldots & 1 & 0 \end{array} \right) .$$
+%Durch die Entwicklung der Determinante sehen wir leicht, dass
+%$$ \text{det}(\lambda I - A) = \frac{1}{\alpha_s} \rho(\lambda) $$
+%gilt. Deshalb sind die Eigenwerte von $A$ genau die Nullstellen von $\rho$ mit der gleichen Vielfachheit. Ist $A$ diagonalisierbar, so sehen wir sofort, dass einfache Eigenwerte mit Betrag kleiner gleich eins genau die Stabilität
+%$$ \max_k \Vert V_k \Vert \leq C \max_k \Vert G_k \Vert = C \max_k \vert g_k \vert $$
+%und damit auch 
+%$$ \max_k \vert v_k \vert \leq C \vert g_k \vert .$$
+%Im nichtdiagonalisierbaren Fall kann man über die Eigenschaften der Jordan'schen Normalform zeigen, dass wir unter den Bedingungen des Stabilitätskriteriums von Dahlquist immer die obige Abschätzung erhalten. Da wir nun wieder ein System von Differenzengleichungen erster Ordnung haben und analog auf der rechten Seite den Konsistenzfehler schreiben können, ist die weitere Abschätzung analog wie bei Einschrittverfahren und wir erhalten folgendes Resultat:
+%
+%\begin{theorem}Ein lineares Mehrschrittverfahren mit den Polynomen $\sigma$ und $\rho$ erfülle die Konsistenzbedigungen zur Ordnung $p$ sowie das Stabilitätskriterium von Dahlquist. Dann ist das Verfahren konvergent von der Ordnung $p$.
+%\end{theorem}
+%Es bleibt aber immer noch die Frage offen welche Konvergenzordnung wir wirklich erreichen können, d.h. welche Konsistenzordnung ein stabiles Verfahren erreichen kann. Es gilt tatsächlich folgende Einschränkung:
+%
+%\begin{theorem}Ein stabiles $s$-Schritt Verfahren sei konsistent von der Ordnung $p$ . Dann gilt $p\leq s+2$, wenn $s$ gerade ist und $p \leq s+1$ für $s$ ungerade. Ist $\frac{\beta_s}{\alpha_s} \leq 0$, also insbesondere bei impliziten Verfahren, dann gilt $p\leq s$.
+%\end{theorem}
+%
+%Als Beispiel für Verfahren, die im impliziten Fall die Ordnung $s+1$ und im expliziten die Ordnung $s$ erreichen, betrachten wir die sogenannten Adams-Verfharen. Deren ist es $\rho$ so zu wählen, dass maximale Stabilität erreicht wird und dann $\sigma$ so zu wählen, dass die Konsistenzordnung maximiert wird. Eine offensichtliche Wahl ist $\rho(x) = (x-1) x^{s-1}$, dann haben wir die Nullstelle $1$ mit Vielfachheit eins und sonst die Nullstelle null mit Vielfachheit $s-1$. Bei einem impliziten Verfahren können wir die Parameter $\beta_0,\ldots,\beta_s$ aus einem linearen Gleichungssystem so bestimmen, dass wir die Konsistenzordnung $s+1$ (da die Matrix dieses Systemes eine Vandermonde Matrix ist, ist dieses System auch lösbar). Im expliziten Fall haben wir $s$ Parameter $\beta_0, \ldots,\beta_{s-1}$ zur Verfügung und können damit Konsistenzordnung $s$ erreichen. Wir betrachten die einfachsten Beispiele:
+%\begin{itemize}
+%\item Für $s=1$ führt das auf die Konsistenzbedingungen
+%$$ 1 = \alpha_1 + \alpha_0 = \beta_1 + \beta_0, \qquad 1 = 2 \beta_1, $$
+%damit erhalten wir das Crank-Nicholson Verfahren $\beta_0 = \beta_1 = \frac{1}2$. Im expliziten Fall haben wir nur $\beta_0 =1$, also das Vorwärts-Euler Verfahren. 
+%
+%\item Für $s=2$ haben wir im expliziten Fall
+%$$ 1 = \beta_1 + \beta_0, \qquad 3 = 2 \beta_1 , $$
+%daraus folgt $\beta_1 =  \frac{3}2, \beta_0 = -\frac{1}2$. Im impliziten Fall erhalten wir 
+%$$ 1 = \beta_2 + \beta_1 + \beta_0, \qquad 3 = 4 \beta_2 + 2 \beta_1, \qquad  5 = 12 \beta_2 + 4 \beta_1, $$
+%daraus folgt $\beta_2 = - \frac{1}4, \beta_1 = 2, \beta_0 = -\frac{3}4$.
+%
+%\end{itemize}
+%
+%
+%\section{Einige weiterführende Themen}
+%
+%Im Folgenden diskutieren wir noch ein paar Aspekte im Umkreis der Numerik von Einschrittverfahren. Dabei beginnen wir mit einfachen partiellen Differentialgleichungen und gehen dann auch noch zur Verbindung von Optimierung und Differentialgleichungen über. 
+%
+%\subsection{Transport}
+%
+%Wir betrachten eine einfache lineare Transportgleichung auf dem Gitter $\Omega^h = h \Z$. Die Zustandsvariable $u_j(t)$ beschreibt den Zustand im Punkt $jh$ zur Zeit $t$, bei einem Transport mit konstanter Geschwindigkeit $v=\frac{h}{\Delta t} > 0$ gilt
+%$$ u_j(t+ \Delta t) = u_{j-1}(t). $$
+%Dies können wir auch als 
+%$$  u_j(t+ \Delta t) = u_j(t) - \Delta t \frac{v}h (u_j(t) - u_{j-1}(t)) $$
+%schreiben, also als Vorwärts-Euler Diskretisierung von
+%$$ u_j'(t) = - \frac{v}h (u_j(t) - u_{j-1}(t)).  $$
+%Die rechte Seite hat eine Lipschitz-Konstante der Ordnung $\frac{1}h$, also beliebig gro{\ss} für $h$ klein. Dennoch ist das Verfahren stabil solange $\frac{v \Delta}h \leq 1$ gilt, denn dann ist
+%$$ u_j(t+\Delta t) = (1 - \Delta t \frac{v}h)  u_j(t) + \Delta t \frac{v}h u_{j-1}(t) $$ 
+%und damit per Dreiecksungleichung
+%$$ \vert u_j(t+\Delta t) \vert = (1 - \Delta t \frac{v}h) \vert u_j(t) \vert+ \Delta t \frac{v}h \vert u_{j-1}(t) \vert 
+%\leq \max\{ \vert u_j(t) \vert,\vert u_{j-1}(t) \vert  \} .$$ 
+%Daraus folgt sofort 
+%$$ \Vert u (t+ \Delta t) \Vert_\infty \leq \Vert u (t ) \Vert_\infty. $$
+%
+%Das Rückwärts-Euler Verfahren liefert hier
+%$$    u_j(t+ \Delta t) = u_j(t) - \Delta t \frac{v}h (u_j(t+\Delta t) - u_{j-1}(t+ \Delta t)) $$
+%und wir wollen nun auch seine Stabilität verstehen. Der Einfachheit halber betrachten wir nur Lösungen mit $u_j(0) = 0$ für $j \leq 0$. Dann gilt dies auch für alle $t > 0$ und wir können ein gestaffeltes System lösen. Es gilt
+%$$ u_1(t+\Delta) = \frac{h}{h+v\Delta t} u_1(t) $$
+%und für $j > 1$
+%$$  u_j(t+\Delta) = \frac{h}{h+v\Delta t} u_j(t) +  \frac{v\Delta t}{h+v\Delta t} u_{j-1}(t+\Delta t). $$
+%Damit zeigen wir leicht 
+%$$ \vert u_j(t+\Delta) \vert \leq \max\{ \vert u_j(t) \vert,  \vert u_{j-1}(t+\Delta t) \vert\} $$
+%und somit induktiv
+%$$ \vert u_j(t+\Delta) \vert \leq \max_{k \leq j} \vert u_k(t) \vert. $$
+%Die impliziert wieder insbesondere die Stabilitätsabschätzung 
+%$$ \Vert u (t+ \Delta t) \Vert_\infty \leq \Vert u (t ) \Vert_\infty, $$
+%in diesem Fall aber ohne jede Beschränkung an den Zeitschritt $\Delta t$.
+%
+%Wir sehen auch, dass wir im Fall $h \rightarrow 0$ eigentlich eine partielle Differentialgleichung approximiert haben, nämlich die lineare Transportgleichung 
+%$$ \partial_t u (x,t ) = - v \partial_x u(x,t) , $$
+%da ja für $h \rightarrow 0$ auch  
+%$$\frac{v}h (u(jh,t) - u((j-1)h,t)) \rightarrow \partial_x u $$
+%gilt. Im obigen Fall haben wir also die partielle Ableitung in $x$ durch einen Rückwärtsdifferenzenquotienten approximiert. Analog könnten wir auch ein Verfahren mit Vorwärtsdifferenzenquotienten in $x$ aufschreiben, d.h. die gewöhnlichen Differentialgleichungen 
+%$$ u_j'(t) =   \frac{v}h (u_j(t) - u_{j+1}(t)).  $$
+%Hier ist allerdings, unabhängig von der Zeitdiskretisierung, das Differentialgleichungssystem schon instabil. Dies sehen wir  mit Lösungen der Form 
+%$$ u_j(t) = e^{\alpha t + i \beta j}, $$
+%die man mit $\alpha = i \frac{v}h (e^{i\beta} -1)$ erhält. Falls $\beta$ keine ganze Zahl ist, erhalten wir immer einen positiven Realteil von $\alpha$, d.h. die Differentialgleichung ist instabil. Der Grund dafür liegt auch in der ursprünglichen Motivation der Transportgleichung. Mit positiver Geschwindigkeit $v$ beschreibt die Transportgleichung die Ausbreitung in steigender $x$-Richtung, dies wird durch den Rückwärtsdifferenzenquotienten korrekt abgebildet, während der Vorwärtsdifferenzenquotient genau die entgegengesetzte Richtung verwendet.
+%
+%\subsection{Diffusion}
+%
+%Wir betrachten im Folgenden einen einfachen Diffusionsprozess, ein Teilchen führt ein Sprungprozess auf dem Gitter $h \Z \cap [0,1]$ mit periodischen Randbedingungen aus aus, wobei es mit gleicher Wahrscheinlichkeit nach links und rechts springt. Die Wahrscheinlichkeit für einen Sprung in einem kleinen Zeitintervall $(t,t+\Delta t)$ ist gleich $2 \alpha \Delta t + {\cal O}(\Delta t^2). $ Dann gilt für die Wahrscheinlichkeit $p_j(t)$, dass das Teilchen zur Zeit $t$ im Gitterpunkt $jh$ ist:
+%$$ p_j(t+\Delta t ) = p_{j-1}(t) \alpha \Delta t + p_{j+1}(t) \alpha \Delta t + p_j(t) (1- 2 \alpha \Delta t) + {\cal O}(\Delta t^2), j=0,\ldots,N,$$
+%wobei $p_{-1} = p_N$, $p_{N+1}=p_0$. Mit $\Delta t \rightarrow 0$ erhalten wir 
+%$$p_j'(t) = \alpha ( p_{j-1}(t)   + p_{j+1}(t)-2  p_j(t)  ). $$
+%Wir beachten, dass die obige Herleitung wieder auf das Vorwärts-Euler Verfahren 
+%$$p_j(t+\tau ) = p_{j-1}(t) \alpha \tau + p_{j+1}(t) \alpha \tau + p_j(t) (1- 2 \alpha \tau)   $$
+%führt. Wieder sehen wir sofort, dass das Verfahren stabil ist für $\alpha \tau < 1$. Dies ist potentiell eine starke Einschränkung an $\tau$, wenn $\alpha$ sehr gro{\ss} ist. Insbesondere können wir, mit $D= \alpha h^2$ das Verfahren wieder als Ortsdiskretisierung einer partiellen Differentialgleichung
+%$$ \partial_t p = D \partial_{xx} p $$ 
+%sehen. Damit gilt Stabilität für $\tau \sim h^2$, was für sehr kleines $h$ problematisch ist.
+%
+%Verwenden wir ein Rückwarts-Euler Verfahren zur Zeitdiskretisierung, so ergibt sich
+%$$ p_j(t+\tau ) = p_j(t) + p_{j-1}(t+\tau) \alpha \tau + p_{j+1}(t+\tau) \alpha \tau  -2 p_j(t)  \alpha \tau.$$
+%Dieses Verfahren ist wiederum stabil ohne Schranke an den Zeitschritt. Dies sehen wir folgenderma{\ss}en: Sei 
+%$P(t) = (p_0(t),\ldots,p_N(t))^T$, dann gilt
+%$$ (I + \alpha \tau B) P(t+ \tau) = P(t), $$
+%mit 
+%$$ B = \left( \begin{array}{cccccc} 2 & -1 & 0 & \ldots & 0 & -1\\
+%  -1 &2 & -1 & \ldots & 0 & 0 \\  0 & -1 & 2 & \ldots & 0 & 0 \\
+%	 \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\   
+%	0 & 0 & 0 & \ldots &  2 & -1 \\ 
+%	-1 & 0 & 0 & \ldots &  -1 & 2  
+%	\end{array} \right) . $$
+%Wie man leicht zeigt, gilt für jedes $P \in \R^{N+1}$ 
+%$$ P^T B P = \sum_j (p_{j+1} - p_j)^2 \geq 0. $$
+%Damit ist $B$ positiv semidefinit und für jedes $\tau > 0$ ist $I+\tau B$ positiv definit und invertierbar. Insbesondere erhalten wir eine Stabilitätsabschätzung 
+%$$ \Vert P(t+\tau) \Vert_2^2 +  \alpha \tau P(t+\tau)^T B P(t+\tau) = P(t+\tau)^T P(t) \leq \frac{1}2  \Vert P(t+\tau) \Vert_2^2 + 
+%\frac{1}2  \Vert P(t) \Vert_2^2. $$
+%Wegen der positiven Semidefinitheit von $B$ folgt dann
+%$$ \Vert P(t+\tau) \Vert_2 \leq \Vert P(t ) \Vert_2 \leq \ldots \leq \Vert P(0 ) \Vert_2.$$
+%Tatsächlich gilt in diesem Fall sogar
+%$$ \min_j p_j(0) \leq \min_j p_j(t) \leq \max_j p_j(t) \leq \max_j p_j(0), $$
+%ähnliche Argumente werden wir im nächsten Kapitel sehen. 
+%
+%Die numerische Lösung der Differentialgleichung für $p_j$ im Intervall $t \in (0,T)$ ist effizient zur Berechnung der Wahrscheinlichkeit, dass das Teilchen zur Zeit $T$ in verschiedenen Punkten $x$ ist, wenn es zur Zeit $t=0$ in einem Punkt $x_0=kh$ ist. Dann benötigen wir die Lösung des Systems für einen Anfangswert mit $p_k(0)=1$ und $p_j(0)=0$ für $j \neq k$. Schwieriger ist die Beantwortung der umgekehrten Frage, d.h der Wahrscheinlichkeit, dass das Teilchen zur Zeit $T$ in einem gewissen Punkt $x_0$ ist, abhängig davon, wo das Teilchen zur Zeit $t=0$ war. Dazu müssten wir das Differentialgleichungssystem mit vielen verschiedenen Anfangswerten (gleich eins in jeweils einem Punkt und gleich null sonst) lösen und dann im Punkt $x_0$ auswerten.  
+%
+%Eine Alternative für die letzte Fragestellung ist die sogenannte adjungierte Methode. Dazu berechnen wir die Lösung des adjungierten Problems
+%$$  q_j'(t) = 2\alpha q_j(t) - \alpha q_{j+1}(t) - \alpha q_{j-1}(t), $$
+%mit Endwert $q_k(T) = 1$ und $q_j(T) = 0$ für $j\neq k$. Die Lösung dieses Problems ist genauso zu berechnen wie für das ursprüngliche System, dies sehen wir einfach mit der Variablentransformation $s=T-t$, dann haben wir ein Anfangswertproblem mit den gleichen Vorzeichen wie das System für $p_j$ zu lösen. Hat man die Lösung berechnet, dann gilt
+%\begin{align*} p_k(T) &= \sum_j p_j(T) q_j(T) \\
+%&= \sum_j p_j(0) q_j(0) +\sum_j \int_0^T (p_j q_j)'~dt \\
+%&= \sum_j p_j(0) q_j(0) + \int_0^T \sum_j (p_j q_j' + p_j' q_j)~dt \\ &= \sum_j p_j(0) q_j(0),
+%\end{align*}
+%da man leicht sieht, dass $\sum_j (p_j q_j' + p_j' q_j) = 0$ gilt. Nun können wir die obige Frage beantworten, denn wenn wir die Lösung $p_j$ mit Anfangswert $p_\ell(0)=1$ einsetzen, ist $p_k(T) = q_\ell(0)$. Im Gegensatz zur direkten Berechnung müssen wir nun wieder nur ein Differentialgleichungssystem für die $q_j$ lösen. 
+%
+%Das dahinter liegende Prinzip ist das Folgende: haben wir eine lineare Differentialgleichung
+%$$ u'(t) = A(t) u(t)$$
+%und interessieren wir uns nicht für die Lösung $u(T)$, sondern nur für eine lineare Funktion $L^T u(T) \in \R$. Dann lösen wir das adjungierte Problem 
+%$$ v'(t) = - A(t) v(t)$$
+%mit dem Endwert $v(T) = L$. Dann gilt
+%\begin{align*} L^T u(T) &= v(T)^T u(T) = v(0)^T u(0) + \int_0^T (v(t)^T u(t))'~dt \\
+%&= v(0)^T u(0) + \int_0^T (v'(t)^T u(t) + v(t)^T u'(t))~dt
+%&=  v(0)^T u(0), \end{align*}
+%da $v'(t)^T u(t) + v(t)^T u'(t) = - (A(t)^T v(t))^T u(t) + v(t)^T A(t) u(t) =0$ gilt. Haben wir die adjungierte Gleichung für $v$ berechnet, können wir $L^T u(T)$ für jeden Anfangswert sofort durch ein Skalarprodukt $v(0)^T u(0)$ berechnen. 
+%
+%Bei einer numerischen Lösung müssen wir natürlich die Differentialgleichung mit einer geeigneten Methode (Ein- oder Mehrschrittverfahren) diskretisieren. Es empfiehlt sich wiederum die adjungierte Gleichung mit einem passenden Verfahren zu lösen um die Eigenschaft der Adjungierten auch im Diskreten zu erhalten. Haben wir für $u$ z.B. ein Vorwärts-Euler Verfahren 
+%$$ u(t_{k+1}) = u(t_k) + \tau A u(t_k) $$
+%verwendet, so liefert das explizite Euler Verfahren in umgekehrter Zeit
+%$$ v(t_k) = v(t_{k+1}) + \tau A^T v(t_k)$$
+%genau die richtige Diskretisierung. Es gilt dann nämlich
+%\begin{align*}
+%	u(t_N) \cdot v(t_N) &= u(0) \cdot v(0) + \sum_{k=0}^{N-1} (u(t_{k+1}) \cdot v(t_{k+1}) - u(t_{k })  \cdot v(t_{k })) \\
+%	 &= u(0) \cdot v(0) + \sum_{k=0}^{N-1} ((u(t_{k+1})  - u(t_{k }) \cdot v(t_{k+1}) + (v(t_{k+1}) - v(t_{k })) \cdot u(t_k) ) \\
+%	 &= u(0) \cdot v(0) + \sum_{k=0}^{N-1} (A u(t_{k })\cdot v(t_{k+1}) - (A^T v(t_{k })) \cdot u(t_k) ) = u(0)\cdot v(0) .
+%\end{align*}
+%Man sieht leicht, dass bei anderen Verfahren für die adjungierte Gleichung, z.B. einem impliziten Euler-Verfahren, eine solche Identität nicht erhalten ist. Die Diskretisierung und Adjungierung kommutieren dann nicht. Beim expliziten Euler-Verfahen erhalten wir genau die Adjungierte der Diskretisierung der Differentialgleichung.
+%
+%\subsection{Optimierung bei Differentialgleichungen}
+%
+%Ein häufiges Thema in der Praxis ist die Bestimmung von Parametern in gewöhnlichen Differentialgleichungen, d.h. wir haben ein Anfangswertproblem
+%$$ u'(t) = F(t,u(t),w), \quad u(0) = u_0(w), $$
+%bei dem die rechte Seite und der Anfangswert von Parametern $w \in \R^M$ abhängen. Wir nehmen an, dass $F$ Lipschitz stetig ist, damit existiert für gegebenes $w$ eine eindeutige stetig differenzierbare Lösung, die wir mit $u_w$ bezeichnen. Um die Parameter zu bestimmen, misst man $G(u) \in R^K$, typischerweise mit $K > M$ oder versucht man versucht die Parameter so zu optimieren um einen Zustand $G(u)$ zu erreichen. Häufig sind dies die Werte der Lösung zu verschiedenen Zeiten, also $G(u) = (u(s_1), \ldots, u(s_K))$. Nun kann man bei gegebenen Daten $g$ ein Optimierungsproblem, etwa das Kleinstquadrate-Problem 
+%$$ f(w) = \frac{1}2 \Vert H(w) - g \Vert^2  = \frac{1}2 \Vert G(u_w) - g \Vert^2 \rightarrow \min_w $$
+%lösen um die Parameter zu bestimmen.  Wir fragen uns wie wir in diesem Fall die Lösung des Optimierungsproblems durch eines der Verfahren in dieser Vorlesung, etwas des Gradientenverfahrens, bestimmen können. Dazu ist die effiziente Berechnung von $\nabla w$ essentiell. 
+%
+%\begin{example}
+%Als einfaches Beispiel betrachten wir einen Fall, wo wir zwar wissen, dass eine lineare Differentialgleichung erfüllt ist, aber nicht mit welcher Steigung der linearen Funktion und auch den Anfangswert nicht kennen. Dies führt auf 
+%$$ u_0(w) = w_1, \qquad F(t,u,w) = w_2 u. $$
+%Hier können wir explizit $u_w(t) = w_1 e^{w_2t}$ berechnen. Für $G(u) = (u(s_1), \ldots, u(s_K))$ erhalten wir dann
+%$$ \partial_{w_1} G(u_w) = (e^{w_2 s_1},\ldots,e^{w_2 s_K}), \quad \partial_{w_2} G(u_w) = (w_1 s_1 e^{w_2 s_1},\ldots,w_1 s_K e^{w_2 s_K}). $$
+%\end{example}
+%
+%Wie gehen wir aber vor, wenn wir die Gleichung nicht explizit lösen können ? Dazu betrachten wir zunächst 
+%$$ u^i_w := \lim_{\delta \rightarrow 0} \frac{u_{w+\delta e_i}(t)- u_w(t)}{\delta}, $$
+%wobei $e_i$ der $i$-te Einheitsvektor ist. $u^i_w$ ist die partielle Ableitung von $u_w$ nach $w_i$.  Diese Funktion können wir nicht berechnen, aber wir können ein Anfangswertproblem herleiten, das von ihr gelöst wird. Unter der Annahme, dass $w\mapsto u_0(w)$ differenzierbar ist, sehen wir sofort
+%$$ u_w^i(0) = \partial_{w_i} u_0(w), $$
+%und wenn $F$ bezüglich $u$ und $w$ differenzierbar ist folgt mit der Kettenregel
+%$$ (u_w^i)'(t) = \partial_u F(t,u_w(t),w) u_w^i(t) + \partial_w F(t,u_w(t),w). $$
+%Wir beachten, dass wir diese lineare Differentialgleichungen für jedes $u_w^i$ sind, da wir $u_w$ ja schon vorher durch Lösen der ursprünglichen Anfangswertproblems berechnen können. Ist $G$ ebenfalls differenzierbar, dann folgt
+%$$ \partial_{w_i} H(w) = G'(u_w) u_w^i, $$
+%daraus bekommen wir also die Jacobi Matrix von $H$ bzw. dann den Gradienten von $f$ per Kettenregel. 
+%
+%Wir rechnen dies nun noch an unserem obigen Beispiel nach. Hier gilt 
+%$$ u_w^1(0) = 1, \qquad u_w^2(0)=0, $$
+%und
+%$$ (u_w^1)'(t) = w_2 u_w^1(t), \qquad (u_w^2)'(t) = w_2 u_w^2(t) + u_w, $$
+%und $\partial_{w_i} G(u) = (u_w^i(s_1),\ldots,u_w^i(s_K))$.
+%Diese können wir explizit lösen und erhalten $u_w^1(t) = e^{w_2 t}$ und $u_w^2(t) = w_1 t e^{w_2 t}. $
+%Natürlich stimmen die Ableitungen dann wieder mit der direkten Differentiation der expliziten Lösung $u_w$ überein. 
+%
+%Ist die Anzahl $M$ der Paramete gro{\ss}, so ist die Berechnung der Ableitungen in dieser Form sehr aufwändig, da wir $M$ lineare Differentialgleichungen lösen müssen. Dies kann aber vermieden werden, wenn wir uns daran erinnern, dass wir eigentlich 
+%$$ \partial_{w_i} f(w) = (G(u_w) - g) \cdot G'(u_w) u_w^i $$ 
+%berechnen wollen, also eine lineare Funktion von $u_w^i$. Es ist dementsprechend naheliegend wieder eine adjungierte Methode zu verwenden. Wir betrachten dies wieder näher für $G(u) = (u_w(s_1),\ldots,u_w(s_K)). $ Wir definieren $v$ als die Lösung von
+%$$ v'(t) = - \partial_u F(t,u_w(t),w) v(t), \qquad t \in (0,T) \setminus \{s_1,\ldots,s_K\}, $$
+%mit $v(T) =0$. An den Messstellen setzen wir
+%$$ v(s_k) = u_w(s_k) - g_k +  \lim_{t \downarrow s_k} v(t) .   $$
+%Dann gilt mit $s_0=0$, $s_{K+1}=T$,
+%\begin{align*}
+%\partial_{w_i} f(w) &= \sum_k (u_w(s_k) - g_k)u_w^i(s_k) \\
+%&=  	\sum_k (\lim_{t \uparrow s_k} v(t) - \lim_{t \downarrow s_k} v(t))u_w^i(s_k) \\
+%&= v(0) u_w^i(0) + \sum_{k=0}^K \int_{s_k}^{s_{k+1}} (v(t)u_w^i(t))'~dt  \\
+%&= v(0) u_w^i(0) + \int_0^T (v(t)u_w^i(t))'~dt  \\
+%&= v(0) \partial_{w_i} u_0(w) + \int_0^T v(t) \partial_{w_i} F(t,u_w(t),w) ~dt  .
+%\end{align*}
+%Damit genügt zur Berechnung des Gradienten die Lösung einer adjungierten Differentialgleichung, sowie von $M$ Skalarprodukten mit Anfangswerten und $M$ Integralen mit der Lösung $v$.
+%
+%\subsection{Deep Learning}
+%
+%In modernen Anwendungen des machine Learning kommen ähnliche Techniken wie bei Differentialgleichungen und deren Optimierung zum Einsatz. Die Idee dabei ist einen parametrisierten Zusammenhang zwischen Input- und Output Daten zu konstruieren. Dieser Zusammenhang wird beim deep Learning durch ein neuronales Netz mit vielen Schichten (Layer) modelliert, das mathematisch als Hintereinanderausführung von linearen Abbildungen (Austausch von Impulsen zwischen Neuronen) und punktweisen Nichtlinearitäten (Aktivierung eines Neurons durch die eingelangten Impulse) modelliert. Die Aktivierungsfunktion bezeichnen wir mit $\sigma: \R \rightarrow \R$, typische Beispiele sind die Sigmoid-Funktion
+%$$ \sigma(x) = \frac{1}{1+e^{-x}}$$
+%und die Rectified Linear Unit (ReLU) 
+%$$ \sigma(x) =\max\{x,0\} . $$
+%Dazu verwenden wir für Vektoren die Notation $\sigma(x)$ als $\sigma(x) = (\sigma(x_i))_{i=1,\ldots,n}$. 
+%
+%Ein neuronales Netzwerk mit $L$ Layern modelliert die Relation $x \mapsto y$ dann durch $u_0 =x$, 
+%$$ u_{k+1} = \sigma(A_k u_k + b_k) , \qquad k=0,\ldots,L-1,$$
+%mit $A_k \in \R^{n \times n}$ und $b_k \in \R^n$, 
+%$$ y = C u_N + d, $$
+%mit $C \in \R^{O \times n}$, $d\in \R^O$. 
+%Während ältere Ansätze von neuronalen Netzen in den 80er und 90er Jahren des zwanzigsten Jahrhunderts meist ein sehr kleines $M$ verwendeten ($M=1,2,3$), benutzt eine modernes tiefes Netz $M$ sehr gro{\ss}, also ein tiefes Netzwerk (daher der Name deep Learning). Wir sehen also eine gewisse analogie zu expliziten Euler-Verfahren für gewöhnliche Differentialgleichungen, dieser ist noch deutlicher bei sogenannten residualen Netzwerken von der Form
+%$$ u_{k+1} = u_k + \tau \sigma(A_k u_k + b_k) , \qquad k=0,\ldots,L-1,$$
+%die wir direkt als Diskretisierung von 
+%$$ u'(t) = \sigma(A(t) u(t) + b(t))$$
+%interpretieren können. 
+%
+%Das Training einens neuronalen Netzwerks ist nun die optimale Bestimmung der Gewichte $w = (A_k, b_k, C, d)$ aus einer gro{\ss}en Menge an Trainingsdaten $(x_i,y_i)_{i=1,\ldots,M}$. Dazu wird ein Minimierungsproblem der Form 
+%$$ f((A_k,b_k),C,d)  = \frac{1}M \sum_{i=1}^M \ell(C u_N(x_i;(A_k,b_k))+d,y_i), $$
+%wobei $\ell$ eine Loss-Funktion ist, die den Abstand misst, z.b. einfach
+%$$ \ell(C u_N(x_i;(A_k,b_k))+d,y_i) = \frac{1}2 \Vert C u_N(x_i;(A_k,b_k))+d - y_i \Vert^2. $$
+%Dies ist für gro{ss}e $N / O / n$ ein riesiges Optimierungsproblem, dessen approximative Lösung lange Zeit ein gro{\ss}es Hindernis bei der Umsetzung solcher Lernansätze war. Der heute gängige Ansatz ist die Berechnung mit einem stochastischen Gradientenverfahren, d.h. durch eine Iteration
+%$$ w_{j+1} =  w_j - \alpha_j \nabla_w \ell(C u_N(x_{i(j)};(A_k,b_k))+d,y_{i(j)}), $$
+%wobei $i(j) \in \{1,\ldots,M\}$ zufällig gewählt wird (meist gleichverteilt). Durch die Auswahl eines einzelnen Datenpaars in jeder Iteration erspart man sich die $M$-fache Berechnung von $u_N(x_{i };(A_k,b_k))$, hier muss in jedem Schritt die Vorwärts-Schleife  nur für einen Anfangswert $x_i$ berechnet werden.  Analog zur adjungierten Methode kann man den Gradienten durch Lösung von 
+%$$ v_{k-1} = -  (A_k \star \sigma'(A_k u_k + b_k))^T v_k $$
+%mit $v_N = \nabla_u \ell(C u_N(x_{i(j)};(A_k,b_k))+d,y_{i(j)})$ berechnen. Dies ist in diesem Zusammenhang als Backpropagation bekannt.

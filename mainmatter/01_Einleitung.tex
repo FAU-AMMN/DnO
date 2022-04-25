@@ -1,0 +1,26 @@
+\chapter{Einleitung}
+
+In dieser Vorlesung werden wir einige weiterführende Aspekte der numerischen Mathematik diskutieren, nämlich numerische Verfahren zur Lösung von Optimierungsproblemen und von (gewöhnlichen) Differentialgleichungen.
+Optimierungsprobleme treten in irgendeiner Form in fast allen mathematischen Anwendungsbereichen auf, von klassischen ökonomischen Problemen über Materialoptimierung bis hin zu modernen Problemen in der Bildverarbeitung und im maschinellen Lernen. 
+Methodisch knüpfen wir im Teil zur Optimierung an die iterativen Methoden zur Lösung von Gleichungssystemen an, allerdings kommen hier noch einige Aspekte dazu: Mit einem Optimierungsproblem im Hintergrund können wir die Iterationsverfahren anpassen um tatsächlich durch die Iteration die Funktionswerte zu verkleinern. 
+Darüber hinaus werden wir geeignete Wahlen der Schrittweite kennenzulernen, um besser die Konvergenz gegen Minimierer oder zumindest stationäre Punkte gewährleisten zu können. 
+Ein weiterer Aspekt ist die Optimierung unter Nebenbedingung und die Minimierung konvexer nichtdifferenzierbarer Probleme, die in vielen modernen Anwendungen auftreten. Dazu werden wir exemplarisch ein Verfahren kennenlernen.
+
+Der weitere Teil der Vorlesung beschäftigt sich dann mit der Lösung von Differentialgleichungen, insbesonderen gewöhnlichen Differentialgleichungen.
+Wir beginnen mit Anfangswertproblemen der Form
+$$ u'(t) = F(u(t),t), \qquad u(0)=u_0, $$
+die nur für spezielle Formen von $F$ gelöst werden können. 
+Allgemeinere Funktionen $F:\R^n \rightarrow \R^n$ treten aber in einer Vielzahl von Anwendungen auf, z.B. bei den Newtonschen Gesetzen für die Dynamik von Teilchen. Die entstehenden Systeme sind dann auch beliebig gro{\ss}, z.B. in der Molekulardynamik, wo $u(t)$ die Koordinaten $M$ verschiedener Teilchen im Zeitverlauf beschreibt ($N=3M$). 
+Andere klassische Anwendungsgebiete gewönlicher Differentialgleichungen sind die Populationsdynamik oder auch die Modellierung von Aktienmärkten, wo meist noch eine zufällige Komponente hinzugefügt wird (stochastische Differentialgleichungen). 
+Die numerischen Verfahren zur Lösung von Anfangswertproblemen sind einerseits ähnlich zu Iterationsverfahren, wenn die Ableitung durch Differenzenquotienten auf einem Gitter approximiert wird, andererseits zu numerischer Integration, wenn man die äquivalente Formulierung als Volterra-Integralgleichung
+$$ u(t) = u_0 + \int_0^t F(u(s),s)~ds$$
+benutzt und Quadraturformeln auf das Integral anwendet. 
+Ein wichtiger Aspekt ist dabei die Diskretisierung, d.h. wir müssen das unendlichdimensionale Problem der Differentialgleichung, in dem wir eine Funktion $u$ suchen, durch ein endlichdimensionales Problem approximieren, z.B. durch Werte auf einem Gitter. 
+Mathematisch stellt sich dann natürlich die Frage ob und in welchem Sinne das diskretisierte Problem gegen das ursprüngliche konvergiert. 
+
+Zum Abschluss werden wir auch Randwertprobleme betrachten, die zu partiellen Differentialgleichungen führen. Ein einfaches Beispiel ist die Lösung von
+$$ - (a(x) u'(x))' + c(x) u(x) = f(x),  \quad x \in (0,1) $$
+mit Randwerten $u(0)=u(1)=0$. 
+Hier müssen wir die Diskretisierung auf einmal im ganzen Intervall $(0,1)$ durchführen und nicht von einem Schritt zum Nächsten wie bei Anfangswertproblemen. 
+Die Diskretisierung liefert hier ein lineares Gleichungssystem, das wir anschlie{\ss}end lösen müssen. 
+Die Abschätzung des Diskretisierungsfehlers erfordert dann weiterführende Methoden. 
