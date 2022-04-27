@@ -1,38 +1,49 @@
 \chapter{Numerische Lösung von Anfangswertproblemen} 
 
-Im Folgenden wollen wir uns mit der numerischen Lösungen von Anfangwertproblemen für gewöhnliche Differentialgleichungen der Form 
+Im Folgenden wollen wir uns mit der numerischen Lösungen von Anfangswertproblemen für gewöhnliche Differentialgleichungen der Form
+
 \begin{equation}
 u'(t) = \frac{du}{dt} = F(t,u(t)), \quad u(0) = u_0 \label{eq:awp}
 \end{equation}
 
-beschäftigen, wobei $F: \mathbb{R}_+ \times \mathbb{R}^n \rightarrow \mathbb{R}^n$ eine gegebene stetige Funktion ist. Solche Modelle treten in vielen Anwendungen auf, die Modellierung mit Differentialgleichungen ist oft kanonisch, da man nur verstehen muss wie sich eine Größe in hinreichend kleiner Zeit ändern wird, d.h. wir schreiben
+beschäftigen, wobei $F: \mathbb{R}_+ \times \mathbb{R}^n \rightarrow \mathbb{R}^n$ eine gegebene stetige Funktion ist. Die Modellierung mit Differentialgleichungen ist oft kanonisch, da man nur verstehen muss wie sich eine Größe in hinreichend kleiner Zeit ändern wird, d.h. wir schreiben
 
 \begin{equation*}
 u(t+\Delta t)  \approx u(t) + \Delta t F(t,u(t)) ,
 \end{equation*}
 
-wobei der Unterschied zur Exaktheit in dieser Relation dann von höherer Ordnung in $\Delta t$ sein kann. Im Grenzwert $\Delta t \rightarrow 0$ erhalten wir dann die Differentialgleichungen.  Ein einfaches Beispiel für ein Anfangswert sind die Newton'schen Bewegungsgleichungen, die wir als die Gesetze
+wobei der Unterschied zur Exaktheit in dieser Relation dann von höherer Ordnung in $\Delta t$ sein kann. Im Grenzwert $\Delta t \rightarrow 0$ erhalten wir dann die Differentialgleichungen.  Einfache Heuristiken für Differentialgleichungen kennen wir beispielsweise aus der Physik,
 
 \begin{itemize}
 \item Geschwindigkeit ist Änderung des Orts pro Zeit,
 \item Beschleunigung ist Änderung der Geschwindigkeit pro Zeit,
-\item Kraft ist Masse mal Beschleunigung,
+\item Kraft ist Masse mal Beschleunigung.
 \end{itemize}
 
-kennen. Ist $x(t)$ der Ort eines Teilchens zur Zeit $t$, $v(t)$ seine Geschwindigkeit und $a(t)$ die Beschleunigung. Dann gilt
-$$ v(t) = \frac{dx}{dt}(t), \quad a(t) =  \frac{dv}{dt}(t), \quad m a(t) = F(x(t),v(t),t). $$
-Diese Gesetze können wir auch als Differentialgleichungen für $x$ und $v$ (oder den Impuls $p(t)=m v(t)$) lesen, wenn wir $a$ eliminieren, es gilt dann
+Beschreibt $x(t)$ den Ort eines Teilchens zur Zeit $t$, $v(t)$ seine Geschwindigkeit und $a(t)$ die Beschleunigung, dann gilt
+
+\begin{equation*}
+v(t) = \frac{dx}{dt}(t), \quad a(t) =  \frac{dv}{dt}(t), \quad m a(t) = F(x(t),v(t),t),
+\end{equation*}
+
+wobei $F$ ein Kraftfeld ist. Diese Gesetze können wir auch als Differentialgleichungen für $x$ und $v$ (oder den Impuls $p(t)=m v(t)$) lesen, wenn wir $a$ eliminieren, es gilt dann
 $$ \frac{d}{dt} (x(t),v(t)) = (v(t), F(x(t),v(t),t)). $$
-Kennen wir den Anfangsort $x(0)$ und die Anfangsgeschwindigkeit $v(0)$, so haben wir ein Anfangswert für ein System von Differentialgleichungen (im $\mathbb{R}^3$ insgesamt sechs Gleichungen für sechs Unbekannte). In gro{\ss}en Systemen von Teilchen hat man dann Gleichungen für jede Position $x_i$ und die Geschwindigkeiten $v_i$, $i=1,\ldots,N$, mit 
- $$ \frac{d}{dt} (x_i(t),v_i(t))_{i=1,\ldots,N} = (v_i(t), F(x_1(t),v_1(t), \ldots x_N(t),v_N(t),t)). $$
-Zur Beschreibung realer Vorgänge mit vielen Teilchen (Moleküle, Zellen, Tiere in Herden, Fussgänger, Autos ...) erhält man also schnell beliebig komplexe Systeme von Differentialgleichungen. Unser Ziel in diesem Kapitel ist es die numerische Lösung solcher Differentialgleichungen zu untersuchen, zuvor klären wir aber noch einige Grundlagen der gewöhnlichen Differentialgleichungen um diese auch vernünftig verstehen zu können.
+Kennen wir den Anfangsort $x(0)$ und die Anfangsgeschwindigkeit $v(0)$, so haben wir ein Anfangswert für ein System von Differentialgleichungen (im $\mathbb{R}^3$ insgesamt sechs Gleichungen für sechs Unbekannte). 
+
+In großen Systemen von $N$ Teilchen $x_1,\ldots,x_N$ hat man dann Gleichungen für jede Position und die Geschwindigkeiten $v_1,\ldots,v_N$, mit
+
+\begin{equation*} 
+\frac{d}{dt} (x_i(t),v_i(t))_{i=1,\ldots,N} = (v_i(t), F(x_1(t),v_1(t), \ldots x_N(t),v_N(t),t)).
+\end{equation*}
+
+Zur Beschreibung realer Vorgänge mit vielen Teilchen (Moleküle, Zellen, Tiere in Herden, Fußgänger, Autos ...) erhält man also schnell beliebig komplexe Systeme von Differentialgleichungen. Unser Ziel in diesem Kapitel ist es die numerische Lösung solcher Differentialgleichungen zu untersuchen, zuvor klären wir aber noch einige Grundlagen der gewöhnlichen Differentialgleichungen um diese auch vernünftig verstehen zu können.
 
 
 \section{Theorie von Anfangswertproblemen für gewöhnliche Differentialgleichungen}
 
 Wir diskutieren im Folgenden kurz einige theoretische Aspekte gewöhnlicher Differentialgleichungen. Wir beginnen mit einer allgemeinen Theorie der Existenz und Eindeutigkeit. Grundlage dafür ist eine Umformulierung in eine Fixpunktform, sodass wir dann einfach einen passenden Fixpunktsatz anwenden können. Ist $u \in C^1([0,T])$ eine Lösung des Anfangswertproblems \eqref{eq:awp}, dann gilt aus dem Hauptsatz der Integralrechnung auch
 $$ u(t) = u_0 + \int_0^t F(s,u(s)) ~ds , \qquad 0 \leq s \leq T. $$
-Dies können wir als Fixpunktgleichung $u= {\cal F}(u)$  in einem Banachraum interpretieren. Dafür können wir zwei Arten von Fixpunktsätzen anwenden: die erste Art (Satz von Browder, Schauder oder andere Varianten) basiert auf Kompaktheit, d.h. wenn man Funktionen $u$ in den Operator reinsteckt sind diese topologisch danach in einer schöneren Menge. Insbesondere hat diese Menge dann einen Fixpunkt. In unserem Fall entsteht die Kompaktheit aus dem Satz von Arzela-Ascoli, man kann zeigen, dass für $u_n$ beschränkt die Folge ${\cal F}(u_n)$ immer eine konvergente Teilfolge hat. Dies liefert den sogenannten Satz von Peano, der die Existenz einer Lösung für stetiges $F$ garantiert. Da man hier recht abstrakt und über Teilfolgen argumentiert, hat man keine Chance die Eindeutigkeit eines Fixpunkts nachzuweisen. 
+Dies können wir als Fixpunktgleichung $u= {\cal F}(u)$  in einem Banachraum interpretieren. Dafür können wir zwei Arten von Fixpunktsätzen anwenden: die erste Art (Satz von Browder, Schauder oder andere Varianten) basiert auf Kompaktheit, d.h. wenn man Funktionen $u$ in den Operator reinsteckt sind diese topologisch danach in einer schöneren Menge. Insbesondere hat diese Menge dann einen Fixpunkt. In unserem Fall entsteht die Kompaktheit aus dem Satz von Arzela--Ascoli, man kann zeigen, dass für $u_n$ beschränkt die Folge ${\cal F}(u_n)$ immer eine konvergente Teilfolge hat. Dies liefert den sogenannten Satz von Peano, der die Existenz einer Lösung für stetiges $F$ garantiert. Da man hier recht abstrakt und über Teilfolgen argumentiert, hat man keine Chance die Eindeutigkeit eines Fixpunkts nachzuweisen. 
 
 Die zweite Art an Beweisen basiert eigentlich immer auf dem Banach'schen Fixpunktsatz, den wir hier näher diskutieren wollen. Dazu beachten wir, dass falls $F$ im zweiten Argument Lipschitz-stetig ist (mit Modul $L$), folgendes gilt 
 
