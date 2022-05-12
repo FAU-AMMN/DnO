@@ -1,0 +1,206 @@
+\section{Wahl der Schrittweite} 
+
+Wir haben nun verschiedene Abstiegsverfahren der Form \eqref{eq:abstiegsverfahren} kennen gelernt, die uns ein $p_k$ liefern. Offen bleibt noch wie wir am besten (adaptiv w\"ahrend der Optimierung) die Schrittweite $\alpha_k$ w\"ahlen. Im Folgenden werden wir immer annehmen, dass $p_k$ eine Abstiegsrichtung ist, d.h. es gilt 
+\begin{equation}
+\nabla F(x_k) \cdot p_k  < 0. 
+\end{equation}
+Ist $\alpha_k$ sehr klein, dann bleiben wir sicher in einem Bereich wo die Taylor-Approximation 
+$$ F(x_k +\alpha_k p_k) \approx F(x_k) + \alpha_k \nabla F(x_k) \cdot p_k  < F(x_k) $$
+gilt, aber das Iterationsverfahren k\"onnte aber sehr langsam werden. Ist andererseits $\alpha_k$ zu gro{\ss}, dann ist die Abstiegsbedingung nicht mehr garantiert, es k\"onnte z.B. passieren dass $x_k + \alpha_k p_k$ \"uber ein Minimum springt. Deshalb ben\"otigt man im wesentlichen zwei Bedingungen an $\alpha_k$, die zu kleine und zu gro{\ss}e Schritte verhindern.
+
+Zun\"achst wollen wir eine theoretische M\"oglichkeit der optimalen Wahl von $\alpha_k$ untersuchen, n\"amlich jenes $\alpha_k$ das zum gr\"o{\ss}tm\"oglichen Abstieg f\"uhrt:
+$$ \overline{\alpha}_k = \text{arg}\min_\alpha F(x_k + \alpha p_k). $$ 
+Um $ \overline{\alpha}_k $ ausrechnen zu k\"onnen, m\"ussen wir eindimensionale Probleme exakt l\"osen k\"onnen, was im allgemeinen schwierig ist. Deshalb versuchen wir Bedingungen zu finden, die wir leicht \"uberpr\"ufen k\"onnen und f\"ur die wir Konvergenz garantieren k\"onnen. Daf\"ur benutzen wir den Vergleich mit der Linearisierung des Problems und definieren den daraus {\em erwarteten Abstieg}
+\begin{equation} E_k(\alpha) = F(x_k) + \alpha  F'(x_k) p_k - F(x_k) = \alpha  F'(x_k) p_k \end{equation}
+und den tatsächlichen Abstieg
+\begin{equation} 
+D_k(\alpha) = F(x_k  + \alpha   p_k) - F(x_k) .
+\end{equation}
+Unsere beiden Bedingungen k\"onnen wir \"uber die Abweichung von $D_k(\alpha)$ und $E_k(\alpha)$ formulieren. Dies machen die {\em Armijo-Goldstein Bedingungen}, die fordern, dass
+\begin{equation} 
+c_1  E_k(\alpha) > D_k(\alpha) > c_2 E_k(\alpha)  
+\end{equation}
+gilt mit gegebenen Konstanten $0 < c_1 < c_2 < 1$ (wir beachten die Negativit\"at von $E_k$). Die erste Bedingung garantiert, dass zumindest ein gewisser Teil des Abstiegs erreicht wird, die zweite verhindert, dass wir zu stark den Grenzwert Fall $\alpha \rightarrow 0$ ann\"ahern, in dem die Gleichheit mit Konstante gleich eins gilt. Eine typische Wahl der Parameter ist $c_1 =0.1$ und $c_2 = 0.9$. Praktisch kann man den Algorithmus folgendermaßen realisieren: wir beginnen mit einem Wert von $\alpha$, der im letzten Iterationsschritt erfolgreich war und testen die Armijo--Goldstein Bedingung. Ist die erste Ungleichung nicht erf\"ullt, verkleinern wir $\alpha$ (z.B. durch Halbierung), ist die zweite Ungleichung nicht erf\"ullt, dann vergrößern wir $\alpha$. Um nicht in einen periodischen Zyklus zu geraten, sollte man zur Vergrößerung einen anderen Faktor wählen, etwa $1.5$.
+Die Wahl der Schrittweite nach den Armijo-Goldstein Regeln ist also relativ einfach durchführbar und führt auch zu beweisbarer Konvergenz:
+%
+\begin{theorem}{}{thm:abstieg}
+Gegeben sei eine Wahl an Abstiegsrichtungen $p_k$, die für jedes $x_k$, das kein station\"arer Punkt ist, eine uniforme Abstiegsrichung liefert, d.h. es gibt $\beta > 0$ mit
+$$ F'(x_k) p_k < - \gamma \Vert F'(x_k)  \Vert^\beta$$
+mit $\gamma > 0$.
+ Dazu sei $F: \mathbb{R}^n \rightarrow \mathbb{R}$ eine nach unten beschr\"ankte stetig differenzierbare Funktion, sodass die Niveaumenge $ \{ x \in \R^n ~|~ F(x) \leq F(x_0) \} $ beschr\"ankt ist. Ist dar\"uber hinaus $p_k$ beschr\"ankt, dann hat die Folge $x_k$ eine konvergente Teilfolge und jeder H\"aufungspunkt ist ein station\"arer Punkt von $F$.
+\end{theorem} 
+\begin{proof}
+Ist $p_k  = 0$ f\"ur endliches $k$, dann haben wir bereits einen station\"aren Punkt erreicht. Also k\"onnen wir annehmen, dass $p_k \neq 0$ f\"ur alle $k$ gilt und wir damit einen Abstieg haben. Dann impliziert die erste Armijo--Goldstein Bedingung
+$$ F(x_{k+1}) - F(x_k) < c_1 \alpha_k F'(x_k) p_k < 0 $$
+und damit induktiv
+$$F(x_{k+1}) < F(x_k) < \ldots < F(x_0). $$
+Also liegt die gesamte Folge $(x_k)$ in der beschr\"ankten Menge $ \{ x \in \R^n ~|~ F(x) \leq F(x_0) \}$ und hat somit eine konvergente Teilfolge $x_{k_\ell}$ mit Grenzwert $\overline{x}$. Tats\"achlich erhalten wir sogar die st\"arkere Bedingung
+$$ F(x_k) + c_1 \sum_{j=0}^{k-1} (- \alpha_j F'(x_j) p_j) \leq F(x_0). $$
+Mit der uniformen Schranke folgt dann 
+$$   \sum_{j=0}^{k-1}  \alpha_j \Vert F'(x_j) \Vert^{\beta+1}  \leq \frac{1}\gamma \sum_{j=0}^{k-1} (- \alpha_j F'(x_j) p_j) 
+\leq \frac{1}{\gamma c_1} F(x_0). $$
+Damit gilt $\sqrt{\alpha_j} F'(x_j) \rightarrow 0$. Nun m\"ussen wir noch zeigen, dass $\alpha_j$ nicht gegen Null konvergiert. Nehmen wir das Gegenteil f\"ur eine Teilfolge an, dann gilt auch $\alpha_{k_\ell} p_{k_\ell} \rightarrow 0$ und damit gilt f\"ur jedes $\epsilon$ f\"ur $k$ hinreichend gro{\ss}
+$$ F(x_{k_\ell} + \alpha_{k_\ell} p_{k_\ell}) - F(x_{k_\ell}) \leq (1-\epsilon) \alpha_{k_\ell} F'(x_{k_\ell}) p_k < c_2 \alpha_{k_\ell} F'(x_{k_\ell}) p_{k_\ell} ,$$
+was nicht m\"oglich ist, da die Armijo-Bedingungen erfüllt sind. 
+\end{proof}
+
+Für das Gradientenverfahren bzw. Varianten davon können wir mehr zeigen, weil $p_k$ direkt in Verbindung mit $-F'(x_k)$ ist.
+% 
+\begin{corollary}{}{}
+Gegeben sei eine Wahl an Abstiegsrichtungen der Form 
+$$p_k= - A_k F'(x_k) , $$ die
+wobei f\"ur jedes $k \in \N$ die Matrix $A_k \in \mathbb{R}^{n \times n}$ symmetrisch positiv definit ist, $A_k$ uniform beschr\"ankt und mit kleinstem Eigenwert durch  $\lambda>0 $ f\"ur jedes $k$.  
+ Dazu sei $F: \mathbb{R}^n \rightarrow \mathbb{R}$ eine nach unten beschr\"ankte stetig differenzierbare Funktion, sodass die Niveaumenge $ \{ x \in \R^n ~|~ F(x) \leq F(x_0) \} $ beschr\"ankt ist. Dann hat die Folge $x_k$ eine konvergente Teilfolge und jeder H\"aufungspunkt ist ein station\"arer Punkt von $F$.
+\end{corollary} 
+\begin{proof}
+Die Bedingungen für den Konvergenzsatz sind erfüllt mit $\gamma = \lambda$, $\beta = 1$. \end{proof}
+
+
+\section{Nicht-differenzierbare Optimierung}
+
+Im Folgenden widmen wir uns noch einigen nicht-differenzierbaren Problemen, die man h\"aufig in der Datenanalyse und Bildverarbeitung findet. Ein Beispiel ist das sogenannte Lasso-Problem der Minimierung von 
+$$ F(x) = \frac{1}2 \Vert A x - b \Vert^2 + \alpha \Vert x \Vert_{\ell^1}, $$
+f\"ur $A \in \R^{m \times n}$, typischerweise mit $m < n$. Mit der L\"osung dieses Problems f\"ur $\alpha \rightarrow 0$ approximiert man die L\"osung von $Ax=b$ mit minimaler $\ell^1$-Norm, die auch oft die L\"osung mit den meisten Nulleintr\"agen ist. Das Problem dabei ist, dass die $\ell^1$-Norm 
+$$ \Vert  x \Vert_{\ell^1} = \sum_{j=1}^n \vert x_j \vert $$
+nicht differenzierbar ist. Eine interessante Klasse von Problemen, die wir betrachten wollen, ist von der Form
+$$ F(x) = G(x) + H(x), $$
+mit einer stetig differenzierbaren Funktion  $G:\R^n \rightarrow \R$ und einer konvexen nicht notwendigerweise differenzierbaren Funktion $H: \R^n \rightarrow \R$. In diesem Fall k\"onnen wir kein Gradienten-basiertes Optimierungsverfahren verwenden, sondern ben\"otigen einen anderen Ansatz. Zun\"achst ben\"otigen wir aber noch einige Definition um mit konvexen Funktionen umgehen zu k\"onnen.
+
+\begin{definition}{}{}
+Sei $H: \R^n \rightarrow \R$ eine konvexe Funktion, dann ist das Subdifferential an der Stelle $x \in \R^n$ definiert durch
+$$ \partial H(x) =  \{ p \in \R^n ~|~ H(x) + p \cdot (y-x) \leq H(y) \quad \forall~y \in \R^n \}. $$
+Ein Element des Subdifferentials heißt Subgradient.
+\end{definition}
+
+Wir sehen sofort, dass ein Minimum von $H$ durch die Bedingung $0 \in \partial H(\overline{x})$ charakterisiert ist. Diese Bedingung ist \"aquivalent zu $H(\overline{x}) \leq H(y)$ f\"ur alle $y \in \R^n$. F\"ur die Summe einer differenzierbaren und einer konvexen Funktion k\"onnen wir eine entsprechende notwendige Bedingung herleiten:
+
+\begin{lemma}{}{}
+Sei $F=G+H$ mit $G$ stetig differenzierbar und $H$ konvex. $\overline{x} \in \R^n$ sei ein Minimierer von $F$, dann gilt $0 \in G'(\overline{x}) + \partial H(\overline{x})$, d.h. es existiert ein $p \in \partial H(\overline{x})$ mit $p+G'(\overline{x}) = 0$. 
+\end{lemma} 
+\begin{proof}
+Sei $\overline{x}$ ein Minimierer und $p= -F'(\overline{x})$. Dann gilt f\"ur $x$ in einer Umgebung von $\overline{x}$
+$$ G(\overline{x})  + H(\overline{x}) = F(\overline{x}) \leq F(x) = G(x) + H(x) = G(\overline{x}) + G'(\overline{x})(x-\overline{x})+ H(x) + r(x)\Vert x-\overline{x} \Vert $$
+mit $r(x) \rightarrow 0$ f\"ur $x \rightarrow \overline{x}$. 
+Also folgt 
+
+$$  H(\overline{x}) + p \cdot (\overline{x} - x) \leq H(x).$$
+\end{proof}
+
+Wir beginnen mit einem einfachen Beispiel:
+\begin{example}{}{}
+Wir betrachten $H(x) = \vert x \vert$. Dann gilt f\"ur $x \neq 0$ 
+$$ \partial H(x) = \{\text{sign}(x)\}, $$
+w\"ahrend f\"ur $x = 0$
+$$ \partial H(0) = [-1,1] $$
+folgt.
+\end{example}
+Damit können wir auch das Subdifferential der $\ell^1$-norm ausrechnen:
+\begin{example}{}{}
+Sei $H(x) = \Vert x \Vert_{\ell^1}$. Dann gilt  
+$$ \partial H(x) = \{ p \in [-1,1] ~|~ p_i = \text{sign}(x_i) \text{ f\"ur } x_i \neq 0\}. $$
+\end{example}
+
+Wir können also von der Optimalit\"atsbedingung $F'(\overline{x}) + p =0$ ausgehen und damit könnten wir ein Analogon zum Gradientenverfahren als 
+$$ x^{k+1} = x^k - \tau^k( G'(x^k) + p^k), \qquad p^k \in \partial H(x^k) $$
+betrachten. Allerdings ist nicht klar welchen Subgradienten wir ausw\"ahlen sollen wenn mehrere existieren oder ob \"uberhaupt einer existiert. Deshalb werden wir im Folgenden eine Variante betrachten, bei der automatisch Iterierte $x^k$ mit nichtlinearem Subdifferential ausgew\"ahlt werden und ebenso ein $p^k \in \partial H(x^k)$. 
+
+\subsection{Proximales Splitting}
+
+Die Idee des proximalen Splitting, auch {\em Forward-Backward Splitting} genannt ist es den differenzierbaren Teil genauso wie beim Gradientenverfahren auszuwerten (Vorw\"arts bei $x^k$), w\"ahrend der Subgradient bei der n\"achsten Iterierten ausgewertet wird (r\"uckw\"arts bei $x^{k+1}$), d.h.
+$$ x^{k+1} = x^k - \tau^k( G'(x^k) + p^{k+1}), \qquad p^{k+1} \in \partial H(x^{k+1}) .$$
+Wir k\"onnen die Iteration umschreiben zu 
+$$ \frac{1}{\tau^k} x^{k+1} - \frac{1}{\tau^k} x^k + G'(x^k) + p^{k+1} = 0. $$ 
+Diese Gleichung ist die Optimalit\"atsbedingung f\"ur die Minimierung der strikt konvexen Funktion
+$$ F^k(x) = \frac{1}{2 \tau^k} \Vert x - x^k + \tau^k G'(x^k) \Vert^2 + H(x) . $$
+Wir k\"onnen das Verfahren also effizient durchf\"uhren, wenn wir Funktionen der Form 
+$$ \Phi(x) = \frac{1}{2\tau} \Vert x - y \Vert^2 + H(x) $$
+effizient minimieren k\"onnen. Dies ist bei der $\ell^1$-Norm tats\"achlich der Fall, wie wir im Folgenden sehen werden. Zuvor definieren wir noch den sogennanten Proximaloperator prox$_{\tau H}(y)$, als den eindeutigen Minimierer von $\Phi$. 
+
+\begin{example}{}{}
+Sei $H(x) = \vert x \vert$, dann ist $z =$prox$_{\tau H}(y)$ der Minimierer von 
+$$ \Phi(x) = \frac{1}{2\tau} (x - y)^2 + \vert x \vert, $$
+mit der Optimalit\"atsbedingung 
+$$ \frac{1}\tau (y-z) \in \partial \vert z\vert. $$
+Ist $z > 0$, so muss gelten
+$z = y - \tau$, dies ist nur m\"oglich f\"ur $y \geq \tau$. Analog muss f\"ur $z < 0$ gelten $z = y + \tau$, was nur f\"ur 
+$y \leq - \tau$ funktioniert. Ist $-\tau < y < \tau$, dann folgt $p = \frac{y}\tau \in [-1,1] = \partial \vert 0 \vert. $
+\end{example} 
+ 
+Den Proximaloperator für den Betrag $\vert x \vert$ ist der sogenannte Shrinkage-Operator
+$$ \text{shrink}_\tau(y) = \text{prox}_{\tau \vert \cdot \vert}(y) = \left\{ \begin{array}{ll} y - \tau & \text{falls } y > \tau \\y + \tau & \text{falls } y < - \tau  \\ 0 & \text{sonst}. \end{array}\right. $$ 
+Damit k\"onnen wir auch den Proximaloperator f\"ur $H(x) = \Vert x \Vert_{\ell^1}$ berechnen als 
+$$ \text{prox}_{\tau H}(y) = ( \text{shrink}_\tau(y_i))_{i=1,\ldots,n}. $$  
+
+Mit Hilfe des Proximaloperators k\"onnen wir allgemein das Vorw\"arts-R\"uckw\"arts-Splitting Verfahren schreiben als
+$$ x^{k+1} = \text{ prox}_{\tau^k H}(  x^k - \tau^k  G'(x^k) ). $$
+Proximaloperatoren sind in gewisser Weise kontraktiv, d.h. es gilt:
+\begin{lemma}{}{}
+Sei $J$ eine konvexe Funktion, dann ist prox$_J$ Lipschitz stetig mit Modul $1$.
+\end{lemma} 
+\begin{proof}
+Ist $x_i= $prox$_J(y_i)$, dann gilt $ x_i + p_i =  y_i, $ f\"ur ein $p_i \in \partial J(x_i)$. Subtrahieren wir diese Identit\"aten f\"ur $i=1,2$ so folgt
+$$ x_1 - x_2 + p_1 - p_2 = y_1 - y_2. $$
+Ein Skalarprodukt mit $x_1-x_2$ liefert
+$$ \Vert x_1 - x_2 \Vert^2 + \langle p_1 - p_2, x_1-x_2 \rangle = \langle y_1 -y_2, x_1-x_2 \rangle \leq \Vert y_1-y_2 \Vert ~\Vert x_1-x_2 \Vert. $$
+Nun haben wir aus der Definition eines Subgradienten
+\begin{align*} \langle p_1, x_1- x_2 \rangle &\geq F(x_1) - F(x_2) \\
+ \langle p_2, x_2- x_1 \rangle &\geq F(x_2) - F(x_2)  
+\end{align*} 
+und addieren wir diese beiden so erhalten wir $\langle p_1 - p_2, x_1-x_2 \rangle \geq 0$. Also gilt 
+$$ \Vert x_1 - x_2 \Vert \leq \Vert  y_1 - y_2 \Vert , $$
+was genau die gew\"unschte Lipschitz-Stetigkeit des Proximaloperators bedeutet.
+\end{proof}
+
+Analog wie im obigen Beweis können wir auch vorgehen um die Konvergenz des Forward-Backward Splitting Verfahrens zu verstehen. Wir schreiben 
+$$ \frac{1}{\tau^k} (x^{k+1} - x^k) + p^{k+1} = - G'(x^k) $$
+und nehmen ein Skalarprodukt mit $x^{k+1} - x^k$, dann folgt
+$$  \frac{1}{\tau^k} \Vert x^{k+1} - x^k \Vert^2 + \langle p^{k+1}, x^{k+1} - x^k \rangle = - \nabla G (x^k) (x^{k+1} - x^k). $$
+Nehmen wir an, dass $G$ zweimal stetig differenzierbar ist, dann folgt 
+$$ - \nabla G (x^k) (x^{k+1} - x^k) = G(x^k) - G(x^{k+1}) + r^k, $$
+mit Restglied $r^k \leq \frac{C^k}2 \Vert x^{k+1} - x^k \Vert^2, $
+wobei $C_k$ eine Schranke f\"ur die Norm der Hesse-Matrix von $G$ in einer Umgebung von $x^k$ mit Radius $\Vert x^{k+1} - x^k \Vert$ ist. Dar\"uber hinaus gilt
+$$  \langle p^{k+1}, x^{k+1} - x^k \rangle \geq H(x^{k+1}) - H(x^k) $$ 
+und damit 
+$$ (\frac{1}{\tau^k}-C^k) \Vert x^{k+1} - x^k \Vert^2 + F(x^{k+1}) \leq F(x^k). $$
+Theoretisch k\"onnen wir $\tau^k$ so klein w\"ahlen, dass $ \frac{1}{\tau^k}-C^k > \epsilon$ f\"ur kleines $\epsilon > 0$ gilt. 
+Dann ist das Proximale Splitting ein Verfahren, dass $F$ verkleinert und unter analogen Bedingungen wie in Satz \ref{thm:abstieg} erhalten wir, dass $x^k$ eine konvergente Teilfolge hat und 
+$$ \sum_{k=0}^\infty  \Vert x^{k+1} - x^k \Vert^2 < \infty $$
+gilt. Da die Iterierten auf einer beschr\"ankten Menge bleiben, ist die zweite Ableitung von $F$ dort beschr\"ankt und $\tau^k $ kann nach unten beschr\"ankt werden. Aus der Konvergenz
+$$ \nabla G(x^k) + p^{k+1} = \frac{1}{\tau^k}( x^{k+1} - x^k) = 0 $$
+folgern wir dann, dass jeder H\"aufungspunkt die Optimalit\"atsbedingung erf\"ullt. 
+
+\subsection{Primal-Duale Verfahren}
+
+In vielen F\"allen kann man den Proximaloperator von $H$ selbst nicht gut berechnen, dann ist das Proximale Splitting nicht so leicht durchzuf\"uhren. Oft liegt dies daran, dass man die Form $H(x) = J(Bx)$ hat, mit einer nichtdiagonal Matrix $B$ und einer konvexen Funktion $J$, deren Proximaloperator man gut berechnen kann. Ein h\"aufiges Beispiel ist eine Variante des Lasso-Problems, in der man 
+$$ \frac{1}2 \Vert A x - b\Vert_{\ell^2}^2 + \alpha \Vert B x \Vert_{\ell^1} \rightarrow \min_{x \in \R^n}. $$
+Der Proximaloperator von $\Vert B x \Vert_{\ell^1}$ kann im allgemeinen nich einfach berechnet werden, w\"ahren wir f\"ur $B=I$ bereits eine explizite Form haben . Um dies zu umgehen f\"uhrt man oft eine Nebenbedingung mit einer zus\"atzlichen Variable ein, die wir hier $y$ nennen. Setzen wir $y=Bx$, so k\"onnen wir 
+$$ \tilde F(x,y) = G(x) + J(y) $$
+unter der Nebenbedingung $y=Bx$ minimieren.Um eine Nebenbedingung der obigen Form in der Minimierung einfach zu ber\"ucksichtigen, k\"onnen wir die Idee der Lagrange Multiplikatoren verwenden. Wir definieren das Lagrange-Funktional 
+$$ L(x,y,z) = \tilde F(x,y) + \langle z, Bx-y \rangle $$ 
+und \"uberzeugen uns, dass 
+$$ \inf_{x,y,Bx=y} \tilde F(x,y) = \inf_{x,y} \sup_z L(x,y,z) $$
+gilt. Dies liegt daran, dass das Supremum \"uber $L(x,y,z)$ gleich unendlich ist, wenn $Bx \neq y$, d.h. das Infimum wird dort sicher nicht angen\"ahert und es ist reicht das Lagrange-Funktional auf der Menge wo $Bx=y$ gilt zu betrachten. Dort ist aber $L(x,y,z) = \tilde F(x,y)$ .
+
+Wir sehen also, dass wir im Fall der Optimierung mit Nebenbedingungen eigentlich ein Sattelpunktsproblem l\"osen wollen
+$$   \inf_{x,y} \sup_z (G(x) + J(y) + \langle z, y - Bx \rangle ) . $$ 
+Nehmen wir an, dass wir $\inf$ und $\sup$ vertauschen k\"onnen (dies gilt wenn ein Sattelpunkt existiert), dann l\"osen wir
+\begin{align*}  \sup_z \inf_{x,y} G(x) + J(y) + \langle z, Bx - y\rangle) &= \sup_z \inf_{x,y} -(\langle z,y \rangle - J(y) +
+\langle -B^Tz, x \rangle - G(x) )\\
+&= - \inf_z \sup_{x,y} (\langle z,y \rangle - J(y) +
+\langle -B^Tz, x \rangle - G(x) ) \\
+&= - \inf_z (\sup_{y} (\langle z,y \rangle - J(y)) + \sup_x
+\langle -B^Tz, x \rangle - G(x) ) .
+\end{align*}
+Nun k\"onnen wir duale oder primal-duale Formulierungen herleiten, in dem wir die konvex Konjugierte definieren als
+$$ J^*(z) = \sup_{y} (\langle z,y \rangle - J(y)). $$
+Dann haben wir \"aquivalent zum urspr\"unglichen Problem die primal-duale Formulierung
+$$ \inf_z\sup_x ( J^*(z) + \langle -B^Tz, x \rangle - G(x) ) ,$$
+die als Grundlage vieler primal-dualer Verfahren dient. In dieser Formulierung k\"onnen wir um einen Sattelpunkt zu berechnen abwechselnd einen Abstiegsschritt in $z$ und einen Aufstiegsschritt in $x$ durchf\"uhren, z.B. einen Proximalschritt in $z$ und einen Gradientenaufstiegschritt in $x$. Dies f\"uhrt auf eine Variante des sogenannten Uzawa-Verfahrens
+$$ z^{k+1} = \text{prox}_{\tau^k J^*}(z^k + B x^k) , \quad x^{k+1} = - \sigma^k(\nabla G(x^k) + B^T z^k) . $$
+In diesem Fall m\"ussen wir die Matrix $B$ und $B^T$ nur einmal mit einem Vektor multiplizieren in jedem Schritt, sowie den Proximaloperator von $J^*$ ausrechnen. Letzteres ist aber einfach, wenn wir den Proximaloperator von $J$ ausrechnen k\"onnen, es gilt die sogenannte Moreau-Identit\"at
+$$ x = \text{prox}_{\tau J^*}(x) + \tau \text{prox}_{J/\tau}(x/\tau). $$
+Ist $G$ ebenfalls konvex und hat einen einfach auszurechnenden Proximaloperator, so k\"onnen wir auch hier statt dem Gradientenschritt einen Proximaloperator verwenden. 
+
+Wir bemerken zum Abschluss noch eine Dualit\"atsrelation: rechnen wir auch das Supremum in $x$ aus, so erhalten wir das voll duale Problem
+$$ \inf_z ( J^*(z) + G^*(-B^T z)),$$
+die sogenannte {\em Fenchel-Dualit\"at}, das zum urspr\"unglichen \"aquivalent ist, wenn $J$ und $G$ konvex sind.  

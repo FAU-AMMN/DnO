@@ -1,0 +1,338 @@
+\chapter{Numerische Lösung von Randwertproblemen} 
+
+In diesem Abschnitt wollen wir uns mit der Lösung von Randwertproblemen f\"ur lineare gew\"ohnliche Differentialgleichungen zweiter Ordnung besch\"aftigen. Diese sind von der Gestalt
+\begin{equation}
+ - u'' + p u' + q u= g  
+\end{equation}
+f\"ur $x\in (0,1)$ mit Randbedingungen
+\begin{align}
+	 \alpha_0 u'(0) + \beta_0 u(0) &= g_0, \label{rb1}\\
+	 \alpha_1 u'(1) + \beta_1 u(1) &= g_1. \label{rb2}
+\end{align}
+Im Fall $\alpha_i = 0$ spricht man von Dirichlet-Randbedingungen, im Fall $\beta_i=0$ von Neumann-Randbedingungen. 
+
+Mit $a=e^P$, $c=e^P q$ und $f=e^P g$, wobei $P' = p$ ist, k\"onnen wir dieses Problme in einer sogenannten Divergenzform
+\begin{equation}
+	-(au')' + c u = f \label{divergenzform}
+\end{equation}
+bringen. Diese hat einige Vorteile bei  der Analyse und numerischen L\"osung. So k\"onen wir zun\"achst im Fall $c=0$ die Green-Funktion zur L\"osung konstruieren. Es gilt
+$$ a(x) u'(x) = c_1 - \int_0^x f(y) ~dy $$
+und damit 
+$$ u(x) = c_2 + c_1 \int_0^x \frac{1}{a(z)}~dz - \int_0^x \frac{1}{a(z)}   \int_0^z f(y) ~dy~dz. $$
+Mit $A(x) = int_0^x \frac{1}{a(z)}~dz$ und einem Wechsel der Integrale im letzten Term erhalten wir
+$$ u(x) = c_2 A(x) - \int_0^x (A(x) - A(y)) f(y)~dy. $$ 
+Die Konstanten $c_1$ und $c_2$ k\"onnen wir aus den Randbedingungen bestimmen, die ein $2 \times 2$ Gleichungssystem liefern. Wir 
+betrachten hier nur die reinen Dirichlet- oder Neumann-Randbedingungen, die gemischten Randbedingungen (genannt Robin-Bedingungen) \"uberlassen wir als \"Ubung.  
+
+\subsubsection*{Dirichlet-Randbedingungen}
+
+Wir betrachten hier den Fall $\alpha_i=0$ und $\beta_i=1$. Dann ist das Gleichungssystem zur Bestimmung der Konstanten 
+$$c_2 = h_0, \qquad c_2 + c_1 A(1)   - \int_0^1 (A(1) - A(y)) f(y)~dy = h_1. $$  
+Daraus folgern wir
+\begin{align*}
+	u(x) &= h_0 + \frac{A(x)}{A(1)} \left( h_1 - h_0 + \int_0^1 (A(1) - A(y)) f(y)~dy - \int_0^x (A(x) - A(y)) f(y)~dy \right)\\
+	&= \left( 1- \frac{A(x)}{A(1)} \right) h_0 +  \frac{A(x)}{A(1)} h_1  + \int_0^1 G_D(x,y) f(y) ~dy, 
+\end{align*}
+mit der sogenannten Green-Funktion 
+$$ G_D(x,y) =  \left\{ \begin{array}{ll}  A(x)  ( 1- \frac{A(y)}{A(1)}) & x < y \\
+A(y) ( 1-  \frac{A(x)}{A(1)}) & x > y . \end{array}\right.$$
+Aus dieser Rechnung sehen wir sofort folgendes Resultat:
+\begin{theorem}{}{}
+Sei $a \in C^1([0,1])$ mit $a(x) \geq a_0 > 0$ f\"ur alle $x \in [0,1]$, $c \equiv 0$ und $f \in C([0,1])$, Dann existiert eine eindeutige L\"osung $u \in C^2([0,1])$ des Dirichlet-Problems \eqref{divergenzform}, \eqref{rb1}, \eqref{rb2}. Ist $f(x) \geq 0$ f\"ur alle $x \in [0,1]$, so gilt
+$$ \min_x u(x) \geq \min\{h_0,h_1\}. $$
+\end{theorem}
+
+Wir sehen, dass der lineare Operator 
+$$ K_D: f \mapsto \int_0^1 G_D(x,y) f(y)~dy$$
+offensichtlich auf dem Raum der stetigen Funktionen wohldefiniert und beschr\"ankt ist. Damit k\"onnen wir auch den Fall $c \neq 0$ behandeln, da in diesem Fall $u$ eine L\"osung der Fixpunktgleichung
+$$ u = h_0 w + h_1 (1-w) + K_D ( f- cu)
+$$
+mit der Notation $w(x) =  1- \frac{A(x)}{A(1)}$ ist.
+Um das Verhalten in $c$ besser zu verstehen, betrachten wir zun\"achst den Fall von $c$ konstant, also l\"osen wir
+$$ (I+cK_D) u = h_0 w + h_1 (1-w) + K_D  f. $$
+F\"ur $c = -k^2 \pi^2$, $k \in \N$ existiert eine nichttriviale L\"osung $u = \sin(k \pi x)$ des homogenen Systems, in diesem Fall ist der Operator $I+cK_D$ nicht invertierbar.  Also k\"onnen wir in diesen F\"allen die inhomogene Gleichung nicht f\"ur alle rechten Seiten l\"osen. Wir sehen, dass es nur abz\"ahlbar viele Werte von $c$ gibt, f\"ur die $I+cK_D$ nicht invertierbar ist. Dies ist kein Zufall, sondern eine Konsequenz der Spektraltheorie kompakter Operatoren. Mit dem Satz von Arzela-Ascoli kann man zeigen, dass $K_D: C([0,1]) \rightarrow C([0,1])$ kompakt ist, d.h. f\"ur jede beschr\"ankte Folge $u_n$ hat $K_D u_n$ eine konvergente Teilfolge. Die Spektraltheorie kompakter Operatoren garantiert nun, dass es nur eine abz\"ahlbare Menge von $\lambda$ geben kann, sodass $\lambda I - K_D$ nicht invertierbar ist, dazu ist Null der einzige H\"aufungspunkt. Wir sehen den Zusammenhang $c= - \frac{1}\lambda$, also erhalten wir f\"ur die Konstanten $c$ eine abz\"ahlbare Menge mit m\"oglichen H\"aufungspunkten $\pm \infty.$
+
+Wenn wir eine allgemeine Funktion $c$ betrachten, dann können wir immer noch zeigen, dass der Operator $u \mapsto K_D (cu)$ kompakt ist, daraus können wir insbesondere wieder folgern, dass $I+K_D(c \cdot)$ invertierbar ist, wenn sein Nullraum trivial ist. Aus dem Fall von konstantem $c$ sehen wir, dass ein nichttrivialer Nullraum nur bei negativem $c$ auftritt. Dies gilt auch im allgemeinen Fall, Grundlage dafür ist folgende Eigenschaft.
+%
+\begin{lemma}{}{}
+Für alle $f \in C([0,1])$ gilt
+$$ \int_0^1 f(x) (K_D f)(x)~dx = \int_0^1 \int_0^1 G_D(x,y) f(x)f(y)~dx~dy \geq 0, $$
+mit Gleichheit genau dann, wenn $f \equiv 0$. 
+\end{lemma} 
+\begin{proof}
+Wir sehen, dass (mit $u=K_Df$) gilt
+$$ \int_0^1 f(x) (K_D f)(x)~dx = - \int_0^1 (a u')' u ~dx = \int_0^1 (u')^2 ~dx. $$
+Damit folgt sofort, dass die linke Seite immer nichtnegativ ist und Gleichheit genau f\"ur $u'\equiv 0$ gilt. Dies ist aber \"aquivalent zu $f \equiv 0$.
+\end{proof}
+
+Damit können wir nun ein Resultat zur Existenz und Eindeutigkeit zeigen.
+\begin{theorem}
+Sei $a \in C^1([0,1])$ mit $a(x) \geq a_0 > 0$ f\"ur alle $x \in [0,1]$, $c  \in C([0,1])$ mit $c(x) \geq 0$ f\"ur alle $x\in [0,1]$ und $f \in C([0,1])$. Dann existiert eine eindeutige L\"osung $u \in C^2([0,1])$ des Dirichlet-Problems \eqref{divergenzform}, \eqref{rb1}, \eqref{rb2}. 
+\end{theorem} 
+\begin{proof}
+Nach der obigen Argumentation gen\"ugt es zu zeigen, dass der lineare Operator $u\mapsto u+ K_D(cu)$ invertierbar ist bzw. dann sogar, dass er injektiv ist. Sei $u+ K_D(cu) = 0$, dann gilt mit $cu = - c K_D(cu)$ und dem obigen Lemma angewandt auf $f=cu$
+$$ \int_0^1 c u^2 dx = - \int_0^1 c u K_D(cu) ~dx \leq 0, $$
+mit Gleichheit genau dann wenn $cu = 0$ ist. Gilt $cu = 0$ so folgt aber auch $K_D(cu) = 0$ und damit $u=0$. Also ist der Nullraum des Operators trivial, woraus die Invertierbarkeit und damit auch die eindeutige L\"osbarkeit des Randwertproblems folgt.
+\end{proof}
+
+Interessanterweise k\"onnen wir auch in diesem Fall wieder ein ähnliches Maximumsprinzip zeigen, auch wenn wir keine explizite Darstellung der Lösung als Integral mehr haben. Dies erh\"alt man leicht aus einem Widerspruchsbeweis. Sind $c$ und $f$ positiv und nehmen wir an, dass $u$ im Inneren von $[0,1]$ sein Minimum annimmt. Dann gilt an einem solchen Punkt $\overline{x}$
+$$ u'(\overline{x}) = 0, \qquad u''(\overline{x}) \geq 0 . $$
+Eingesetzt in die Differentialgleichung folgt dann 
+$$ cu \geq -(au')' + cu = f   $$ 
+und damit ist $u$ nicht negativ. Die einzige M\"oglichkeit, dass $u$ negative Werte annimmt, besteht wenn das Minimum am Rand angenommen wird, d.h. 
+$$ u(x) \geq \min\{g_0,g_1,0\} . $$ 
+Wegen der Linearit\"at des Problems kann man aus solchen Maximumsprinzipien auch Stabilitätsaussagen herleiten. Ist etwa $\tilde u$ eine bekannte L\"osung f\"ur das Problem 
+$$ -(a \tilde u')' + c \tilde u = \tilde f, $$
+mit Dirichlet Randwerten $\tilde u(0) = \tilde{g}_0$ und $\tilde u(1) = \tilde{g}_1$. Ist $\tilde f \geq f$, so folgt 
+$$ \tilde u - u \geq \min\{0,\tilde{h}_0 - h_0, \tilde{h}_1 - h_1 \} $$
+und daraus eine Absch\"atzung f\"ur das Maximum von $u$. Ist $c > 0$, so k\"onnen wir etwa sehr einfache konstante L\"osungen $\tilde u = \gamma$ konstruieren, indem wir $\tilde f = \gamma c$ setzen. Ist $\gamma$ hinreichend gro{\ss}, dann ist $\tilde f > f$ und $\tilde{h}_i > h_i$. Damit erhalten wir $u(x) \leq \gamma$ f\"ur alle $x$. Umgekehrt k\"onnen wir die Rollen von $\tilde u$ und $u$ auch vertauschen und $\tilde u = -\gamma$ w\"ahlen, damit erhalten wir eine Absch\"atzung f\"ur $\vert u (x) \vert.$ 
+
+\subsubsection*{Neumann-Randbedingungen}
+
+W\"ahrend allgemeine Randbedingungen sehr \"ahnlich zu handhaben sind wie der Dirichlet-Fall, gibt es im Fall reiner Neumann-Randbedingungen einen speziellen Aspekt, den wir beachten m\"ussen. Wir betrachten also $\alpha_i =1$ und $\beta_i =0$, und dazu den Fall $c \equiv 0$. Dann 
+k\"onnen wir die Differentialgleichung von links und rechts aufintegrieren zu
+\begin{align*}
+	- a(x) u'(x) &= - a(0) g_0 + \int_0^x f(y) ~dy \\
+	- a(x) u'(x) &= - a(1) g_1 - \int_x^1 f(y) ~dy  = - a(1) g_1 - \int_0^1 f(y) ~dy +   \int_0^x f(y) ~dy.
+\end{align*}
+Daraus sehen wir sofort, dass wir die Bedingung
+$$ a(0) g_0 =  a(1) g_1 + \int_0^1 f(y) ~dy $$
+zur Konsistenz ben\"otigen. Unter dieser Bedingung ist das System l\"osbar, aber eine der Konstanten ist unbestimmt. Dies wird \"ublicherweise durch eine zus\"atzliche Bedingung wie $\int_0^1 u(x)~dx =1$ erreicht. Der Grund f\"ur diese zus\"atzliche Konsistenzbedingung ist, dass der Nullraum des Neumann-Problems nichttrival ist, jede konstante Funktion l\"ost das homogene Problem. 
+
+Interessanterweise ist die Theorie f\"ur $c > 0$ auch hier unterschiedlich. Sobald $c(x) \geq 0$ f\"ur alle $x$ und $c\neq 0$ gilt, hat das Neumann-Problem nur noch trivialen Nullraum, wie wir aus Multiplikation der Gleichung mit $u$ und Integration sehen, es folgt dann
+$$ 0 = \int_0^1 (-(au')' + c u) u ~dx = \int_0^1 (a(u')^2 + c u^2) ~dx. $$
+Daraus folgt sofort $u'=0$, also $u$ konstant. Ist $c$ nicht identisch null, so kann $\int_0^1 c u^2~dx =0$ bei konstantem $u$ nur f\"ur $u=0$ gelten. Der Unterschied dieser F\"alle und der potentielle Nullraum des Neumann-Problems ist nat\"urlich auch bei der numerischen L\"osung zu beachten, hier wird sich dieser in der Nichtinvertierbarkeit einer entsprechenden Matrix niederschlagen. 
+
+
+\section{Differenzenverfahren f\"ur Randwertprobleme} 
+
+Zur Diskretisierung von Randwertproblemen k\"onnen wir zun\"achst genauso vorgehen wie bei der L\"osung von Anfangswertproblemen. Wir konstruieren ein Gitter $0=x_0 < x_1 < \ldots < x_N =1$, im einfachsten Fall \"aquidistant als $x_k = kh,$ $h=\frac{1}N$, $k=0,\ldots,N$. Auf diesem Gitter approximieren wir Ableitungen durch finite Differenzen. F\"ur die zweite Ableitung in $x_k$ verwenden wir dann den (zentralen) Differenzenquotienten 
+$$ u''(x_k) \approx \frac{u(x_k+h) - 2 u(x_k) + u(x_{k}-h)}{h^2}, $$
+bzw. im nicht\"aquidistanten Fall
+$$ u''(x_k) \approx \frac{1}{h_k} \left( \frac{u(x_{k+1}) -  u(x_k)}{x_{k+1}-x_k} -\frac{u(x_k)- u(x_{k-1})}{x_k - x_{k-1}} \right).$$
+Hier ist zun\"achst die Frage wie wir $h_k$ (abh\"angig von $x_{k-1}, x_k, x_{k+1}$) w\"ahlen sollen. Dies k\"onnen wir als Frage an die maximale Konsistenzordnung formulieren. F\"ur $u$ hinreichend glatt gilt per Taylor-Entwicklung
+\begin{align*}
+	\frac{u(x_{k+1}) -  u(x_k)}{x_{k+1}-x_k} -\frac{u(x_k)- u(x_{k-1})}{x_k - x_{k-1}}  =& u'(x_k) + \frac{1}2 u''(x_k) (x_{k+1} -x_k)  +  \frac{1}6 u'''(x_k) (x_{k+1} -x_k)^2  - \\ &u'(x_k) + \frac{1}2 u''(x_k) (x_k-x_{k-1})  -  \frac{1}6 u'''(x_k) (x_k-x_{k-1})^2 
+	+ {\cal O}(h^3)\\
+	=& u''(x_k) \frac{ x_{k+1}-x_{k-1}}2 +   \frac{1}6 u'''(x_k) (x_{k+1} -2 x_k +x_{k-1})( x_{k+1}-x_{k-1} )
+\end{align*}
+mit $h = \max_k \vert x_{k+1} -x_k\vert^2$.
+Wir sehen, dass wir Konsistenz   mit der Wahl $h_k=\frac{x_{k+1}-x_{k-1}}2$ erreichen. Im \"aquidistanten Fall haben wir aus der Rechnung dann sogar Konsistenzordnung $h^2$, da $x_{k+1} -2 x_k +x_{k-1} = 0$ gilt. Die konsistente Wahl von $h_k$ entspricht folgender Interpretation: eigentlich berechnen wir erste Ableitungen
+\begin{align*}
+	\frac{u(x_{k+1}) -  u(x_k)}{x_{k+1}-x_k} &= u'(x_{k+1/2}) + \cal O{h^2} \\
+	\frac{u(x_k)- u(x_{k-1})}{x_k - x_{k-1}} &= u'(x_{k-1/2}) + \cal O{h^2}
+\end{align*}
+mit den Mittelpunkten
+$$ x_{k\pm1/2} = \frac{1}2 (x_{k\pm 1} + x_k), $$
+also auf einem versetzten neuen Gitter. Nun k\"onnen wir die zweite Ableitung auch diskret als Ableitung der ersten Ableitung betrachten, da eine weitere Anwendung der Differenzen auf die Werte an den versetzten Gitterpunkten $x_{k\pm1/2}$ genau eine Approximation der zweiten Ableitung bei $x_k$ liefert. Die Schrittweite f\"ur diesen zweiten Schritt ist genau das von uns errechnete 
+$$h_k = \frac{x_{k+1} - x_{k-1}}2 =\frac{x_{k+1}+x_k}2 - \frac{x_k+x_{k-1}}2 = x_{k+1/2} - x_{k-1/2}.$$
+
+Damit k\"onnen wir nun zumindest Gleichungen der Form 
+$$ - u'' + c u = f $$
+direkt diskretisieren. Wir betrachten wieder zun\"achst das Dirichlet-Problem, das wir als lineares Gleichungssystem f\"ur den Vektor
+$$ U = (u(x_1),\ldots,u(x_{N-1})) $$ 
+schreiben k\"onnen. Die Werte $u(x_0) = g_0$ und $u(x_N) = g_1$ ergeben sich dann wieder aus den Randbedingungen und k\"onnen direkt eingesetzt werden.  Definieren wir f\"ur $k=1,\ldots,N-1$ die Matrix-Eintr\"age  
+\begin{align*}
+A_{k,k} &= \frac{1}{h_k} \left( \frac{1}{x_{k+1}-x_k} +  \frac{1}{x_k+x_{k-1}} \right) + c(x_k), \\
+A_{k,k-1} &= - \frac{1}{h_k(x_k - x_{k-1})} \\
+A_{k,k-1} &= - \frac{1}{h_k(x_{k+1} - x_{k})} \\
+A_{k,j} &= 0 \qquad \text{sonst, }
+\end{align*}
+und die rechte Seite
+\begin{align*}
+	F_k & =  f(x_k)  \qquad k \in \{2, \ldots,N-2\} \\
+  F_1 & = f(x_1) + \frac{g_0}{h_0(h_0(x_1-x_0)}  \\
+	F_{N_1} &= f(x_{N_1} + \frac{g_1}{h_{N-1}(x_N-x_{N-1})}
+\end{align*}
+so erhalten wir das $(N-1) \times (N-1)$ System
+$$ A U  = F$$
+f\"ur die diskrete L\"osung. Im \"aquidistanten Fall gilt
+$$ A = \frac{1}{h^2} \left( \begin{array}{ccccc} 2 + h^2 c(x_1) & - 1 & 0 & \ldots & 0 \\
+-1 & 2 + h^2 c(x_2)  & -1 & \ldots & 0 \\ 0 & -1 & 2 + h^2 c(x_3) & \ldots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 &0 & \ldots & 2 + h^2 c(x_{N-1})\end{array} \right). $$
+Wir erkennen einige Eigenschaften der Matrix, die auch allgemeiner bei der L\"osung von Randwertproblemen gelten:
+\begin{itemize}
+\item $A$ ist {\em dünnbesetzt} (im engl. {\em sparse}), d.h. die meisten Eintr\"age von $A$ sind gleich null. Hier haben wir von den $(N-1)^2$ Eintr\"agen nur $3N-5$ Eintr\"age, die nicht verschwinden. Dies hat einige Konsequenzen bei der effizienten Speicherung von $A$ sowie bei der L\"osung des Systems $AU =F$. Wir k\"onnen die Matrix im Sparse-Format speichern, d.h. als eine Liste $(i,j,A_{ij})$ f\"ur alle Nichtnulleintr\"age. Statt $(n-1)^2$ reeller Zahlen speichern wir hier nur $6N-10$ ganze und $3N-5$ reelle Zahlen. Dies ist eine enorme Einsparung f\"ur gro{\ss}es $N$. Bei der numerischen L\"osung des linearen Systems ist es auch vorteilhaft diese Struktur zu benutzen. Bei direkten Verfahren wie der LR-Zerlegung ist dies nicht der Fall, dort kann es zum sogenannten Fill-in kommen, d.h. $L$ und $R$ sind nicht mehr d\"unnbesetzt. Grob k\"onnen wir uns den Effekt bei der LR-Zerlegung wie bei der Integration von $-u''=f$, $u'(0) = g_0$, $u(1) =g_1$ vorstellen. Hier erhalten wir durch die Integration von $0$ bis $x$ eine Integraldarstellung f\"ur $u'(x)$, die im diskreten einer linken unteren Dreiecksmatrix enstpricht,  dann integrieren wir von $1$ bis $x$ um $u(x)$ zu erhalten, dies entspricht einer rechten oberen Dreiecksmatrix. Beide Matrizen haben dann keine d\"unnbesetzte Struktur, da das diskrete Integral alle Gitterpunkte benutzt.
+
+\item F\"ur $c \geq 0$ ist die Matrix $A$ schwach diagonaldominant, d.h. $A_{kk} \geq \sum_{j \neq k} \vert A_{kj}$ (bzw. auch in den Spalten $A_{kk} \geq \sum_{j \neq k} \vert A_{jk}$). F\"ur $k=1$ und $k=N-1$ sind diese Ungleichungen sogar strikt.  Wir haben weiter sogar nur positive Diagonaleintr\"age und  nichtpositive Nebendiagonaleintr\"age. Man nennt so eine Matrix M-Matrix, wir werden sp\"ater noch sehen, dass $A$ dann invertierbar ist und die Inverse nur nichtnegative Eintr\"age hat. Dies ist das diskrete \"Aquivalent zum Maximumsprinzip. Hat $F$ nur nichtnegative Eintr\"age, so gilt dann auch $U = A^{-1} F$.
+
+\item Die Matrix $A$ ist symmetrisch, d.h. $A_{jk}  = A_{kj}$ f\"ur alle $k,j$. Dies ist eine Konsequenz aus der Divergenzform, da der Divergenzform, da der Operator $L: u \mapsto - (au')' + cu$ auch formal selbstadjungiert ist. Es gilt mit partieller Integration f\"ur $u$ und $v$ mit Nullrandwerten
+\begin{align*} \langle Lu, v \rangle_{L^2} &= \int_0^1 (Lu)(x)~v(x)~dx = \int_0^1 (-(a(x) u'(x))v(x) + c(x) u(x) v(x)~dx \\
+&= \int_0^1 a(x) u'(x) v'(x)  + c(x) u(x) v(x)~dx \\
+&= \int_0^1 (-(a(x) v'(x)) u(x) + c(x)  v(x)u(x))~dx = \langle v, Lu \rangle_{L^2} .
+\end{align*}
+Ist $c \geq 0$, dann ist $A$ sogar symmetrisch positiv definit. Dies ist eine Konsequenz aus
+$$ \langle L u, u \rangle = \int_0^1 a(x) |u'(x)|^2   + c(x) u(x)^2 ~dx > 0 $$
+f\"ur $u \neq 0$. 
+
+\end{itemize} 
+
+Im allgemeinen Fall einer nichtkonstanten Funktion $a$ k\"onnen wir die selbe Einsicht \"uber verschobene Gitter wie oben benutzen. Die erste Ableitung interpretieren wir diskret als Wert am Mittelpunkt der Gitterzelle $x_{k\pm1/2}$, da wir diese mit $a$ multiplizieren, verwenden wir auch den Wert von $a$ an diesen Gitterpunkten. Dementsprechend approximieren wir
+$$ (a u')'(x_k) \approx \frac{1}{h_k} \left( a(x_{k+1/2}) \frac{u(x_{k+1}) -  u(x_k)}{x_{k+1}-x_k} - a(x_{k-1/2}) \frac{u(x_k)- u(x_{k-1})}{x_k - x_{k-1}} \right). $$
+Auch in diesem Fall gelten alle Eigenschaften der Matrix $A$ wie oben. Damit haben wir insbesondeere die Invertierbarkeit aus der positiven Definitheit. Also ist die L\"osung $u(x_k) =U_k$ eindeutig definiert mit $U \in \R^{N-1}$ L\"osung des Gleichungssystems $AU=F$.
+
+\subsection{Konvergenz von Differenzenverfahren} 
+
+Um die Konvergenz(ordnung) zu vestehen, gehen wir wieder in der \"ublichen Weise vor. Sei $\tilde u \in C^2([0,1])$ die L\"osung des Randwertproblems $\tilde U = (\tilde u(x_k)) \in \R^{N-1}$. Dann gilt 
+$$ A (U - \tilde U) = F - A \tilde U = G, $$
+und wir sehen, dass die rechte Seite $G$ der Konsistenzfehler ist, d.h.
+$$ G(x_k) = (a \tilde u')'(x_k) - \frac{1}{h_k} \left( a(x_{k+1/2}) \frac{u(x_{k+1}) -  u(x_k)}{x_{k+1}-x_k} - a(x_{k-1/2}) \frac{u(x_k)- u(x_{k-1})}{x_k - x_{k-1}} \right). $$
+Wir beachten dabei, dass der Term $cu$ exakt diskretisiert wird und nicht weiter zum Fehler beitr\"agt. Damit k\"onnen wir zun\"achst wieder den Konsistenzfehler 
+\begin{equation}
+\kappa_h = \Vert G\Vert_\infty =  \max_{k} \vert G(x_k) \vert
+\end{equation}
+absch\"atzen. Um Konvergenz zu erhalten ben\"otigen wir eine Absch\"atzung an  die Inverse von $A$, es gilt
+$$ E_h := \Vert U - \tilde U\Vert_\infty = \Vert A^{-1} (U - \tilde U) \Vert_\infty \leq \Vert A^{-1}  \Vert ~ U - \tilde U \Vert_\infty. $$
+Dabei m\"ussen wir die Zeilensummennorm als vertr\"agliche Norm zur Maximumsnorm verwenden. Wir sehen, dass aus Konsistenz(ordnung $p$) auch Konvergenz(ordnung $p$) folgt, wenn $\Vert A^{-1} (U - \tilde U) \Vert_\infty$ beschr\"ankt ist f\"ur $N\rightarrow \infty$ bzw. $h \rightarrow 0$. Dies bezeichnen wir folglich als Stabilit\"at und halten dies entsprechend in einer Definition fort:
+\begin{definition}{}{}
+Ein Differenzenverfahren der obigen Form hei{\ss}t konsistent von der Ordnung $p$, wenn $\kappa_h = {\cal O}(h^p)$ gilt. Das Verfahren hei{\ss}t konvergent von der Ordnung $p$, wenn $E_h  = {\cal O}(h^p)$ gilt.
+\end{definition} 
+
+F\"ur die Stabilit\"atseigenschaft nutzen wir die Eigenschaften der Matrix $A$, die wir ebenfalls definieren:
+\begin{definition}{}{}
+Eine Matrix $B \in \R^{n \times n}$ hei{\ss}t M-Matrix, wenn folgende Eigenschaften erf\"ullt sind:
+\begin{itemize}
+\item $B$ hat nur positive Diagonaleintr\"age und nichtpositive Nebendiagonaleintr\"age.
+\item $B$ ist schwach diagonaldominant, d.h. $B_{kk} \geq \sum_{j \neq k} \vert B_{jk} \vert $.
+\item F\"ur mindestens ein $j \in \{1,\ldots,n\}$ gilt $B_{kk} > \sum_{j \neq k} \vert B_{jk} \vert $.
+\end{itemize}
+\end{definition}{}{}
+Offensichtlich ben\"otigen wir die letzte Bedingung f\"ur die Invertierbarkeit, da sonst auch
+$$ B= \left( \begin{array}{cc} 1 & -1 \\ -1 & 1 \end{array} \right) $$
+zul\"assig w\"are. Wie wir leicht nachrechnen k\"onnen erf\"ullt unsere Diskretisierung diese Eigenschaft:
+\begin{lemma}
+Sei $A$ die Matrix aus dem obigen Differenzenverfahren f\"ur $c \geq 0$. Dannn ist $A$ eine M-Matrix.
+\end{lemma} 
+Nun k\"onnen wir ein wichtiges Resultat \"uber M-Matrizen beweisen:
+\begin{lemma}
+Sei $B$ eine M-Matrix, dann ist $B$ invertierbar und $B^{-1}$ hat nur nicht-negative Einträge.
+\end{lemma}
+\begin{proof}
+Wir nehmen an, dass $B$ irreduzibel ist,  d.h. es existiert eine Permutation $\pi$ von $\{1,\ldots,n\}$, sodass $B_{\pi(i)\pi(i+1)} \neq 0$ gilt. Andernfalls k\"onnen wir analog f\"ur alle irreduziblen Bl\"ocke von $B$ vorgehen. Zun\"achst zeigen wir, dass $B$ invertierbar, d.h. der Nullraum trivial ist. Sei $z \in {\cal N}(B)$ und $z_m$ so, dass $z_m \leq z_k$ f\"ur alle $k$ gilt. Nehmen wir nun an, dass $z_m < 0$ ist, dann folgt
+$$ B_{mm} z_m = - \sum_{j \neq m} B_{mj} z_j =   \sum_{j \neq m} \vert B_{mj} \vert  z_j \geq \sum_{j \neq m} \vert B_{mj} \vert  z_m . $$
+Ist $z_m <0$, so folgt wegen der Diagonaldominanz  $\sum_{j \neq m} \vert B_{mj} \vert  z_m \geq B_{mm} z_m. $ Dies ist aber nur m\"oglich, wenn $z_j = z_m$ f\"ur alle $j$ mit $B_{mj} \neq 0$ gilt. Damit ist auch $z_j$ minimal und wir k\"onnen das gleiche Argument auf $z_j$ anwenden, wegen der Irreduzibilit\"at erreichen wir dann schrittweise alle Eintr\"age von $z$.   Dies bedeutet der konstante Vektor $z_j = 1$ f\"ur alle $j$ ist eine L\"osung, was aber der Bedingung 
+$$  B_{kk} > \sum_{j \neq k} \vert B_{jk} \vert = - \sum_{j \neq k}  B_{jk},  $$
+f\"ur ein $k$ gilt. Also muss $\min_k z_k\geq 0$ gelten. Analog k\"onnen wir aber auch $\max_k z_k \leq 0$ zeigen, also bleibt nur $z \equiv 0$ im Nullraum. 
+
+Um zu zeigen, dass die Inverse von $B$ nur nicht-negative Einträge hat, k\"onnen wir zeigen, dass die L\"osung $z$ von $Bz=y$, mit $y$ gleich einem Einheitsvektor, nur nicht-negative Einträge hat. Dies ist nat\"urlich \"aquivalent dazu, dass die L\"osung von $Bz = y$ mit nicht-negativem $y$ nur nicht-negative Eintr\"age hat. Dazu benutzen wir das selbe Argument wie oben: Sei $z_k = \min_j z_j < 0$. Dann ist
+$$ B_{kk} z_k = - \sum_{j\neq k} B_{kj} z_j + y_k \geq -  \sum_{j\neq k} B_{kj} z_k \geq B_{kk} z_k$$
+mit Gleichheit wenn $y_k = 0$ und $x_j = x_k$ f\"ur alle $j$. Dann folgt aber auch $y_j =0$ für alle $j$ und deshalb $z = 0$, ein Widerspruch zu $z_k < 0$.
+\end{proof}
+
+Die M-Matrix Eigenschaft ist eine wesentliche Voraussetzung f\"ur den Stabilitätsbeweis. Wie beim Maximumsprinzip für die Differentialgleichung werden wir Vergleichsl\"osungen suchen, um Fehlerschranken zu erhalten. Dazu ist es wichtig, dass die Vergleichsl\"osung unabh\"angig von $h$ (bzw. $N$) ist, deshalb konstruieren wir diese f\"ur die Differentialgleichung. Im Folgenden sei $v \in C^2([0,1])$ die L\"osung von 
+$$ - (av')' +c v = f \qquad \text{in }(0,1)$$
+mit homogenen Dirichlet-Randwerten $v(0)=v(1)=0$. Dazu bezeichnen wir wieder mit $\tilde u$ die L\"osung des Dirichlet-Problems mit rechter Seite $f$ und Randwerten $g_0$ und $g_1$. Um die Abh\"angigkeit von $h$ klar zu machen, bezeichnen wir die Matrix und rechte Seite der Diskretisierung mi$ A_h$ bzw. $F_h$. Die L\"osung von $A_h U = F_h$ bezeichnen wir mit $U^h = (u^h(x_k))_{k=1,\ldots,N-1}$. Mit dem \"ublichen Konsistenzfehler $G_h$ gilt
+$$ A_h (\tilde U^h - U^h) = G_h$$
+wobei   $\tilde U^h = (\tilde u^h(x_k))_{k=1,\ldots,N-1}$ ist. Nun betrachten wir 
+$$ \tilde U^h - U^h \pm 2 \kappa_h V^h$$
+mit dem globalen Konsistenfehler $\kappa_h = \Vert G_h  \Vert_\infty$ und  $V^h = (v^h(x_k))_{k=1,\ldots,N-1}$.
+Die Idee dabei ist, dass
+\begin{align}
+	A_h (\tilde U^h - U^h+2 \kappa_h V^h) &\geq 0 \label{rwpA} \\
+	A_h (\tilde U^h - U^h-2 \kappa_h V^h) &\leq 0 \label{rwpB}
+\end{align}
+gelten sollte, zumindest f\"ur kleines $h$. Damit erhalten wir aus der Monotonie 
+$$ - 2  \kappa_h V^h \leq \tilde U^h - U^h \leq  2 \kappa_h V^h, $$
+und da 
+$$ \Vert V^h \Vert_\infty \leq \max_{x \in [0,1]} \vert v(x) \vert $$
+gilt, erhalten wir daraus dann eine gleichmäßige Schranke f\"ur den Konvergenzfehler
+$$ E_h = \Vert \tilde U^h - U^h \Vert_\infty. $$
+Etwas präziser machen wir die obige Eigenschaft in folgendem Lemma.
+\begin{lemma}{}{}
+Seien $U^h, \tilde U^h, V^h, A_h$ und $G_h$ definiert wie oben, mit $\kappa_h = \Vert G_h  \Vert_\infty$.
+Dann gelten f\"ur $h$ hinreichend klein die Ungleichungen \eqref{rwpA} und \eqref{rwpB}.
+\end{lemma}
+\begin{proof}
+Wegen der Konsistenz des Verfahrens wird f\"ur $h$ hinreichend klein die Differenz
+$$ A_h V^h - (-(av')'(x_k) + c(x_k))_{k=1,\ldots,N-1}  = A_h V^h - (1)_{k=1,\ldots,N-1} $$
+beliebig klein, insbesondere gilt dann 
+$$ A_h V^h \geq (\frac{1}2)_{k=1,\ldots,N-1}. $$
+Setzen wir nun ein, so folgt 
+$$ A_h (\tilde U^h - U^h+2 \kappa_h V^h) = G_h + 2 \kappa_h A   V^h \geq G_h + \kappa_h (1)_{k=1,\ldots,N-1} \geq 0
+$$ 
+und da $\kappa_h = \Vert G \Vert_\infty$ gilt. Analog folgt die zweite Ungleichung.
+\end{proof}
+
+Als direkte Folgerung erhalten wir ein  Konvergenzresultat f\"ur Differenzenverfahren, denn die M-Matrix Eigenschaft impliziert, dass $\tilde U^h - U^h\pm 2 \kappa_h V^h$ nur nichtnegative bzw. nichtpositive Eintr\"age haben:
+\begin{theorem}{}{}
+Seien $U^h, \tilde U^h, V^h, A_h$ und $G_h$ definiert wie oben, mit $\kappa_h = \Vert G_h  \Vert_\infty$.
+Dann gilt f\"ur $h$ hinreichend klein
+$$ E_h = \Vert U^h - \tilde U^h \Vert_\infty \leq 2 \Vert v \Vert_\infty  \kappa_h, $$
+insbesondere stimmen die Konsistenz- und Konvergenzordnung \"uberein. 
+\end{theorem} 
+ 
+Wir sehen, dass die obige Theorie auch leicht auf andere Differenzenverfahren anwendbar ist, solange Konsistenz vorliegt und die entsprechende M-Matrix Eigenschaft erf\"ullt ist. So kann man die Aussagen auch auf partielle Differentialgleichungen erweitern, etwa wenn wir 
+$$ - \nabla \cdot (a \nabla u ) + cu = f $$
+auf einem rechteckigen Gebiet l\"osen wollen, mit $\nabla \cdot (a \nabla u ) = \sum_{i=1}^d \partial_{x_i} (a \partial_{x_i} u). $
+Legen wir dar\"uber ein Gitter und diskretisieren die zweiten Ableitungen in jeder Richtung analog, so erhalten wir wieder ein konsistentes Verfahren, das durch ein lineares System mit einer M-Matrix beschrieben wird. Damit k\"onnen wir eine v\"ollig analoge Theorie durchf\"uhren und Konvergenz beweisen. Der einzige kleine Unterschied ist, dass wir keine Tridiagonalmatrix erhalten, sondern eine etwas allgemeinere d\"unnbesetzte Matrix. Dies \"andert aber wenig an der Struktur, nur die numerische L\"osung des Gleichungssystems $AU=F$ wird deutlich aufw\"andiger, da wir viel mehr Gitterpunkte ben\"otigen. Wir werden uns deshalb sp\"ater noch mit der numerischen L\"osung d\"unnbesetzter linearer Systeme besch\"aftigen.  Der einzige Nachteil in mehreren Dimensionen ist, dass finite Differenzen kanonisch f\"ur rechteckige Gitter verwendbar sind. Hat man andere Gebiete auf denen man partielle Differentialgleichungen l\"osen will, kommen eher Verfahren wie finite Elemente zum Einsatz, deren Idee wir im Folgenden noch kurz diskutieren wollen. 
+
+\section{Finite Elemente Verfahren f\"ur Randwertprobleme} 
+
+Finite Elemente Verfahren konstruiert man im Mehrdimensionalen basierend auf einer Triangulierung des Gebiets, die Idee ist dabei st\"uckweise polynomiale Ansatzfunktionen zu verwenden  (\"ahnlich den Splines bei der Interpolation). Damit kann man einfache Ansatzfunktionen auf dem Gebiet konstruieren und numerische L\"osungen als Linearkombinationen davon berechnen. 
+
+In einer Dimension kann man wieder Ansatzfunktionen auf einem Gitter $0=x_0 < x_1 < \ldots < x_N =1$ konstruieren. Wir beschr\"anken uns auf den Fall st\"uckweise linearer Funktionen. Die finiten Elemente sind dabei Ansatzfunktionen mit lokalem Tr\"ager, n\"amlich
+\begin{align*}
+\phi_0(x) &= \left\{ \begin{array}{ll}\frac{x_1-x}{x_1-x_0}  & x  < x_1 \\  0 & \text{sonst,} \end{array} \right. \\
+\phi_j(x) &= \left\{ \begin{array}{ll}\frac{x-x_{j-1}}{x_j-x_{j-1}}  & x_{j-1} < x  < x_j \\ 
+\frac{x_{j+1}-x}{x_{j+1}-x_{j}}  & x_{j} < x  < x_{j+1} \\ 0 & \text{sonst,} \end{array} \right. \\
+\phi_N(x) &= \left\{ \begin{array}{ll}\frac{x-x_{N-1}}{x_N-x_{N-1}}  & x  > x_{N-1} \\  0 & \text{sonst,} \end{array} \right. \\
+\end{align*}
+Dies ist eine Basis f\"ur die st\"uckweise linearen Funktionen \"uber diesem Gitter. Der Tr\"ager von $\phi_j$ und $\phi_k$ ist f\"ur $\vert j - k \vert > 1$ disjunkt, was noch wichtige Auswirkungen auf das sp\"ater zu l\"osende lineare System haben wird. 
+
+Die diskrete L\"osung k\"onnen wir nun als Funktion in der Form
+$$ u^h(x) = \sum{j=0}^N U_j \phi_j(x) $$
+schreiben, die unbekannten Koeffizienten $U_j$ erf\"ullen dann $U_j=u^h(x_j)$. Damit k\"onnen wir aus den Dirichlet Randwerten direkt $U_0=g_0$ und $U_N = g_1$ bestimmen, es bleibt also noch Gleichungen f\"ur $U_j$, $j=1,\ldots,N-1$ herzuleiten. Nat\"urlich k\"onnen wir die gesamte Differentialgleichung nicht als Grundlage nehmen, nicht mal bei den St\"utzstellen $x_j$, da die Funktion $u^h$ dort nicht einmal einfach differenzierbar ist. Stattdessen verwendet man die Idee der Galerkin-Diskretisierung, man projeziert die Gleichung und rechte Seite einfach in den Raum, der durch die $\phi_j$ aufgespannt wird. D.h. wir fordern statt einer linearen Gleichung $Lu = f$ nur 
+$$ \langle Lu, \phi \rangle = \langle f, \phi \rangle $$
+f\"ur alle $\phi \in {\cal U}_h = $lin$\{\phi_j\}_{j=1,\ldots,N-1}$. Dies liefert ein \"aquivalentes $(N-1) \times (N-1)$ System
+$$ \sum_j U_j \langle L \phi_j, \phi_i \rangle = \langle f - g_0 U_0 - g_1 U_N, \phi_i \rangle \qquad i=1,\ldots,N-1. $$
+Wir schreiben im Folgenden einfach $f$ statt $f - g_0 U_0 - g_1 U_N$, da das Dirichlet Problem mit Randdaten $g_0$, $g_1$ offensichtlich die selbe L\"osung liefert wie das homogene Dirichlet Problem mit ge\"anderter rechter Seite $f$. Wie k\"onnen wir in unserem Fall von st\"uckweise linearen Funktionen aber $\langle L\phi_j, \phi_i \rangle$ definieren, da offensichtlich $L\phi_j$ nicht wohldefiniert ist (die erste Ableitung von $\phi_j$ existiert fast \"uberall, ist aber in $x_j$ unstetig, deshalb macht die zweite Ableitungen keinen Sinn in dieser einfachen Form.) Die Antwort liefert die sogenannte schwache Formulierung des Randwertproblems. Diese erhalten wir folgenderma{\ss}en: es gilt f\"ur funktionen mit homogenen Randwerten
+$$ \langle L u, \phi \rangle = \int_0^1 (Lu)(x)\phi(x)~dx = \int_0^1 (-(au')'+cu)\phi~dx = \int_0^1 a u' \phi' + cu \phi~dx =:B(u,\phi) .$$ 
+$B$ ist eine symmetrische Bilinearform, die wir auch f\"ur st\"uckweise stetig differenzierbare Funktionen \"aquivalent als
+$$ B(u,\phi) = \sum_{j=0}^{N-1} \int_{x_j}^{x_{j+1}} a u' \phi' + cu \phi~dx  $$ 
+schreiben k\"onnen. Damit haben wir automatische eine geeignete Diskretisierung, die L\"osung $u_h$ l\"asst sich aus
+$$ B(u,\phi) = \langle f, \phi \rangle $$
+f\"ur alle $\phi \in {\cal U}_h$ schreiben. Dies ist \"aquivalent zum linearen Gleichungssystem 
+$$ A U = F$$ 
+mit $F_i =  \langle f, \phi_i \rangle$ und $A_{ij} = B(\phi_i,\phi_j)$.
+
+Die Matrix $A$ ist offensichtlich symmetrisch, sie ist sogar positiv definit, da f\"ur alle $z \in \R^{N-1}$ gilt
+$$ z^T A z = \sum_{ij} z_i z_j B(\phi_i,\phi_j) = B(\sum_i z_i \phi_i, \sum_j z_j \phi_j) > 0. $$
+Dazu ist die Matrix $A$ wegen des lokalen Tr\"agers der $\phi_i$ wieder d\"unnbesetzt, sogar tridiagonal, da wir sofort sehen, dass
+$$ A_{ij} = B(\phi_i,\phi_j) = 0 \qquad \text{f\"ur } \vert i - j \vert > 1$$
+gilt. 
+
+\begin{example}{}{}
+Als Beispiel berechnen wir $A$ im Fall $a=1$, $c$ konstant und $x_j = jh$. Dann gilt wegen $\phi_i'=\frac{1}h$ in $(x_{i-1},x_i)$ und $\phi_i'=-\frac{1}h$ in $(x_{i },x_{i+1})$
+$$ A_ii = \int_{x_i-h}^{x_i+h} \frac{1}{h^2}~dx + c  \int_{x_i-h}^{x_i} \left( \frac{x-x_{i}+h}h \right)^2~dx
++ c  \int_{x_i}^{x_i+h} \left( \frac{x_{i}+h-x}h \right)^2~dx = \frac{2}h + \frac{2c}3 h. $$
+Genauso erhalten wir 
+$$ A_{ii+1}=A_{i-1i} = - \frac{1}h + c \frac{1}6 h.$$
+F\"ur $h < \sqrt{\frac{c}6}$ ist $A$ wieder eine M-Matrix und wir k\"onnen die Theorie aus dem letzten Abschnitt anwenden. Allgemeiner k\"onnen wir aber eine Theorie basierend auf der Bilinearform $B$ konstruieren. 
+\end{example}
+
+Da $B$ symmetrisch, positiv definit und bilinear ist, definiert $B$ auch ein Skalarprodukt und 
+$$ \Vert u \Vert_B = \sqrt{B(u,u)} $$
+ist eine Norm. Es gilt auf dem Intervall $(0,1)$ f\"ur Funktionen mit $u(0) = 0$ sogar 
+$$ \Vert u\Vert_\infty \leq \sqrt{\int_0^1 (u')^2~dx} \leq C \sqrt{B(u,u)} $$
+mit einer Konstante $c > 0$. Ist $\tilde u$ eine L\"osung des Dirichlet-Problems, dann gilt insbesondere
+$$ B(\tilde u,\phi) = \int_0^1 f \phi ~dx
+$$ f\"ur alle $\phi \in {\cal U}_h$. Damit folgt die sogenannte Galerkin-Orthogonalit\"at
+$$ B(\tilde u - u_h, \phi) = 0 \qquad \forall \phi \in {\cal U}_h. $$
+Sei nun $\tilde u_h$ eine gegebene Approximation von $\tilde u$ in ${\cal U}_h$, z.B. die Interpolierende an den Gitterpunkten, 
+dann gilt mit $\phi = \tilde u_h - u_h$ auch 
+$$ 0 = B(\tilde u - u_h,\tilde u_h - u_h) = B(\tilde u - u_h, \tilde u - u_h)  - B(\tilde u - u_h,\tilde u - \tilde u_h). $$
+Da eine Bilinearform immer die Cauchy-Schwarz Ungleichung erf\"ullt, folgt weiter
+$$ \Vert \tilde u - u_h \Vert_B^2 =  B(\tilde u - u_h, \tilde u - u_h)=  B(\tilde u - u_h,\tilde u - \tilde u_h) 
+\leq \Vert \tilde u - u_h \Vert_B \Vert \tilde u - \tilde u_h \Vert_B $$
+und damit 
+$$ \Vert \tilde u - u_h \Vert_B \leq \Vert \tilde u - \tilde u_h \Vert_B. $$ 
+Die rechte Seite k\"onnen wir durch den Interpolationsfehler absch\"atzen, es gilt 
+$$ \tilde u - \tilde u_h \Vert_B^2 \leq \max\{\Vert a\Vert_\infty, \Vert c \Vert_\infty\} \int_0^1 ( \tilde u' - \tilde u_h')^2 + 
+ ( \tilde u - \tilde u_h)^2~dx $$
+Durch eine einfache Taylorentwicklung und Ausnutzung von $\tilde u \in C^2$ erhalten wir dann 
+$$  \int_0^1 ( \tilde u' - \tilde u_h')^2 + 
+ ( \tilde u - \tilde u_h)^2~dx \leq C_I h^2 $$
+f\"ur eine Konstante $C_I$ und daraus 
+$$ \Vert \tilde u - u_h \Vert_B  \leq \sqrt{\max\{\Vert a\Vert_\infty, \Vert c \Vert_\infty\} C_I} h. $$
+Damit haben wir also direkt eine Absch\"atzung des Konvergenzfehlers hergeleitet. Wir beachten, dass die Konsistenz hier dem letzten Schritt (Taylor-Entwicklung der Interpolierenden) entspricht und wir die Stabilit\"at aus der Galerkin-Orthogonalit\"at erhalten, wir haben also auch wieder die \"ubliche Kombination f\"ur ein konvergentes Diskretisierungsverfahren.
