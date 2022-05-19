@@ -234,7 +234,11 @@ Nun benötigen wir zwei zentrale Eigenschaften von Diskretisierungsmethoden:
 %
 \begin{itemize}
 \item {\em Konsistenz: } Der Fehler
-$$ f_\tau(t_k,u(t_k),u(t_{k+1})) - \int_{t_k}^{t_{k+1}} F(t,u(t))~dt,$$
+%
+\begin{align*}
+f_\tau(t_k,u(t_k),u(t_{k+1})) - \frac{1}{\tau}\int_{t_k}^{t_{k+1}} F(t,u(t))~dt,
+\end{align*}
+%
 d.h. das Residuum der Lösung des Anfangswertproblems eingesetzt in das numerische Verfahren konvergiert gegen Null für $\tau \rightarrow 0$.
 %
 \item {\em Stabilität: } Bei der Umsetzung des numerischen Verfahrens mit gegebener rechter Seite wird diese nicht beliebig verstärkt, insbesondere existiert eine Abschätzung unabhängig von $\tau.$ 
@@ -314,7 +318,29 @@ Um eine Konvergenzordnung $p$ zu erhalten, benötigen wir, dass $F$, aber auch $
 %
 \subsection{Stabilität und Konvergenz}
 
-Wir widmen uns nun der Frage der Stabilität von Einschrittverfahren. Dazu zeigen wir zunächst uniforme Schranken an $u_\tau$:
+Wir widmen uns nun der Frage der Stabilität von Einschrittverfahren. Hierbei verwenden wir eine diskrete Version des Lemmas von Gronwall.
+
+\begin{lemma}{Diskretes Gronwall Lemma}{}
+Es sei $\beta_j \geq 0, j\in\N_0$ eine Folge nicht-negativer Zahlen und für die Folge $u_j\in\R, j\in\N_0$ gelte 
+%
+\begin{align*}
+u_0&\leq \alpha\in\R^+_0\\
+u_k&\leq \alpha + \sum_{j=0}^{k-1} \beta_j u_j
+\end{align*}
+%
+für $k\in\N$, dann gilt die Abschätzung
+%
+\begin{align*}
+u_k \leq \alpha \exp\left(\sum_{j=0}^{k-1} \beta_j\right).
+\end{align*}
+\end{lemma}
+%
+\begin{proof}
+Übung.
+\end{proof}
+%
+
+Wir zeigen zunächst uniforme Schranken an $u_\tau$.
 %
 \begin{lemma}{}{}
 Sei $F_\tau$ stetig und Lipschitz-stetig bezüglich des dritten Arguments (d.h. $u_\tau(t_{k+1}$) mit Modul unabhängig von $\tau$. Dann existiert eine Konstante $M(T)$ unabhängig von $\tau$, sodass
@@ -331,8 +357,11 @@ und mit der Dreiecksungleichung folgt für $v_k = \Vert u_\tau(t_k) - u_0 \Vert$
 &\leq  v_k + \tau L (v_k + v_{k+1}) + \tau C. 
 \end{align*}
 %
-Hier haben wir benutzt, dass $f_\tau$ stetig ist, damit folgt $ f_\tau(t,u_0,u_0) $ ist auf dem kompakten Intervall  $[0,T]$ durch eine Konstante $C$ beschränkt. Dazu bezeichnet $L$ den Lipschitz-Modul von $f_\tau$ bezüglich zweitem und drittem Argument. Sei nun $\tau \leq \frac{1}{2L}$, d.h. $1- \tau L \geq \frac{1}2$, dann folgt 
-$$ v_{k+1} \leq v_k + {\tau L} v_k + 2 \tau C. $$
+Hier haben wir benutzt, dass $f_\tau$ stetig ist, damit folgt $ f_\tau(t,u_0,u_0) $ ist auf dem kompakten Intervall  $[0,T]$ durch eine Konstante $C$ beschränkt. Dazu bezeichnet $L$ den Lipschitz-Modul von $f_\tau$ bezüglich zweitem und drittem Argument. Sei nun $\tau \leq \frac{1}{2L}$, d.h. $1- \tau L \geq \frac{1}2$, dann folgt
+%
+\begin{align*}
+v_{k+1} \leq 2(1+\tau L) v_k + 2 \tau C.
+\end{align*}
 Das diskrete Lemma von Gronwall impliziert dann die Beschränktheit von $v_k$.
 \end{proof}
 
@@ -344,9 +373,30 @@ $$ E_\tau = \max_{t_k} \Vert u_\tau(t_k) - u(t_k) \Vert \leq C \max_{t_k} \Vert 
 \end{theorem}
 %
 \begin{proof}
-Wir definieren $v_k = \Vert u_\tau(t_{k+1} - t_k) \Vert$, dann gilt wieder mit Dreiecksungleichung und Lipschitz-Stetigkeit von $f\tau$
-$$ v_{k+1} \leq v_k + L \tau (v_k + v_{k+1}) + \Vert g_\tau(t_k) \Vert. $$
-Für $\tau \leq \frac{1}{2L}$ erhalten wir die gewünschte Schranke wieder direkt aus dem diskreten Lemma von Gronwall.
+Wir definieren $v_k = \Vert u_\tau(t_{k}) -u(t_k)) \Vert$, dann gilt wieder mit Dreiecksungleichung und Lipschitz-Stetigkeit von $f_\tau$
+%
+\begin{align*}
+v_{k+1} &= \norm{ u_\tau(t_k) + \tau f_\tau(t_k, u_\tau(t_k), u_\tau(t_{k+1})) - u(t_k) -\int_{t_k}^{t_{k+1}} F(t,u(t)) dt}\\
+&\leq
+%
+v_k + \tau \norm{f_\tau(t_k, u_\tau(t_k), u_\tau(t_{k+1})) - f_\tau(t_k, u(t_k), u(t_{k+1}))}\\
+&\mathrel{\phantom{\leq v_k}}
++\tau 
+\norm{f_\tau(t_k, u(t_k), u(t_{k+1})) - \frac{1}{\tau} \int_{t_k}^{t_{k+1}} F(t,u(t)) dt}\\
+%
+&\leq
+%
+v_k + \tau L (v_k + v_{k+1}) + \norm{g_\tau(t_k)}
+\end{align*}
+%
+also haben wir
+%
+\begin{align*}
+v_{k+1} &\leq v_k + L \tau (v_k + v_{k+1}) + \Vert g_\tau(t_k) \Vert\\
+\Rightarrow
+&v_{k+1} \leq \frac{1+\tau L}{1-\tau L} v_k + \max_{t_k}\norm{g_\tau(t_k)}
+\end{align*}
+Für $\tau < \frac{1}{2L}$ erhalten wir die gewünschte Schranke wieder direkt aus dem diskreten Lemma von Gronwall.
 \end{proof}
 
 Eine direkte Folgerung ist die Äquivalenz von Konsistenz und Konvergenz für Einschrittverfahren.
@@ -453,7 +503,7 @@ Beide sind von der Form
 \end{equation} 
 mit der Abkürzung $F_k = F(t_k,u_\tau(t_k))$. Ein solches Verfahren hei{\ss}t lineares Mehrschrittverfahren, diese sind mit Abstand die Gebräuchlichsten und wir werden uns hier darauf einschränken. Damit wir wirklich ein $s$-schritt Verfahren haben, werden wir immer annehmen, dass $\alpha_s \neq 0$ und $|\alpha_0|+|\beta_0|> 0$ gilt.
 
-Bei der numerischen Berechnung gehen wir analog wie bei Einschrittverfahren vor, wir müssen nur zusätzlich zu $u_\tau(t_k)$ auch die Werte $u_\tau(t_{k-1}),\ldots,u_\tau(t_{k-s+1}$ speichern. Ein effektiver Unterschied zu Einschrittverfahren sind die Anfangswerte. Um ein Verfahren mit $s>1$ Schritten durchzuführen benötigen wir nicht nur $u_0$, sondern auch $u_\tau(t_1),\ldots,u_\tau(t_{s-1})$. Diese müssen wir durch ein anderes Verfahren, etwa ein Einschrittverfahren, erst berechnen. Dabei müssen wir natürlich drauf achten, dass dieses Verfahren von der selben Konvergenzordnung wie das Mehrschrittverfahren gewählt wird, um diese insgesamt nicht zu verkleinern. 
+Bei der numerischen Berechnung gehen wir analog wie bei Einschrittverfahren vor, wir müssen nur zusätzlich zu $u_\tau(t_k)$ auch die Werte $u_\tau(t_{k-1}),\ldots,u_\tau(t_{k-s+1})$ speichern. Ein effektiver Unterschied zu Einschrittverfahren sind die Anfangswerte. Um ein Verfahren mit $s>1$ Schritten durchzuführen benötigen wir nicht nur $u_0$, sondern auch $u_\tau(t_1),\ldots,u_\tau(t_{s-1})$. Diese müssen wir durch ein anderes Verfahren, etwa ein Einschrittverfahren, erst berechnen. Dabei müssen wir natürlich drauf achten, dass dieses Verfahren von der selben Konvergenzordnung wie das Mehrschrittverfahren gewählt wird, um diese insgesamt nicht zu verkleinern. 
 
 Bei expliziten Verfahren, d.h. $\beta_s = 0$, ist die Wohldefiniertheit der einzelnen Schritte dann klar, im impliziten Fall benötigen wir das übliche Fixpunktargument um die Wohldefiniertheit zu gewährleisten:
 \begin{lemma}{}{}
