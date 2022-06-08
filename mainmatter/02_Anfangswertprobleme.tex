@@ -127,7 +127,7 @@ $v'(t) = D v(t)$, d.h. jeder Eintrag erfüllt $v_i'(t) = D_{ii} v_i(t)$ und wir 
 Die Lösung $u$ erhalten wir wieder durch Multiplikation mit $B^{-1}$. Im Fall einer Diagonalmatrix ist es naheliegend die Exponentialfunktion einer Matrix $e^{Dt}$ als die Diagonalmatrix mit den Einträgen $e^{D_{ii}t}$ zu definieren. Wir haben dann
 
 \begin{align*}
-u(t) = B^{-1} e^{Dt} v(0) =  B^{-1} e^{Dt} B u(0) =: e^{At} u(t).
+u(t) = B^{-1} e^{Dt} v(0) =  B^{-1} e^{Dt} B u(0) =: e^{At} u(0).
 \end{align*}
 
 Wir bekommen durch Diagonalisieren der Matrix also eine Definition des Matrixexponentials, die dann eine Lösung des Anfangswertproblems liefert. Im Fall einer nicht diagonalisierbaren Matrix ist ein ähnliches Vorgehen über die Jordan'sche Normalform möglich, was hier aber zu weit führen würde.
@@ -624,7 +624,7 @@ Es bleibt aber immer noch die Frage offen welche Konvergenzordnung wir wirklich 
 Ein stabiles $s$-Schritt Verfahren sei konsistent von der Ordnung $p$ . Dann gilt $p\leq s+2$, wenn $s$ gerade ist und $p \leq s+1$ für $s$ ungerade. Ist $\frac{\beta_s}{\alpha_s} \leq 0$, also insbesondere bei impliziten Verfahren, dann gilt $p\leq s$.
 \end{theorem}
 
-Als Beispiel für Verfahren, die im impliziten Fall die Ordnung $s+1$ und im expliziten die Ordnung $s$ erreichen, betrachten wir die sogenannten Adams-Verfharen. Deren ist es $\rho$ so zu wählen, dass maximale Stabilität erreicht wird und dann $\sigma$ so zu wählen, dass die Konsistenzordnung maximiert wird. Eine offensichtliche Wahl ist $\rho(x) = (x-1) x^{s-1}$, dann haben wir die Nullstelle $1$ mit Vielfachheit eins und sonst die Nullstelle null mit Vielfachheit $s-1$. Bei einem impliziten Verfahren können wir die Parameter $\beta_0,\ldots,\beta_s$ aus einem linearen Gleichungssystem so bestimmen, dass wir die Konsistenzordnung $s+1$ (da die Matrix dieses Systemes eine Vandermonde Matrix ist, ist dieses System auch lösbar). Im expliziten Fall haben wir $s$ Parameter $\beta_0, \ldots,\beta_{s-1}$ zur Verfügung und können damit Konsistenzordnung $s$ erreichen. Wir betrachten die einfachsten Beispiele.
+Als Beispiel für Verfahren, die im impliziten Fall die Ordnung $s+1$ und im expliziten die Ordnung $s$ erreichen, betrachten wir die sogenannten Adams-Verfahren. Deren ist es $\rho$ so zu wählen, dass maximale Stabilität erreicht wird und dann $\sigma$ so zu wählen, dass die Konsistenzordnung maximiert wird. Eine offensichtliche Wahl ist $\rho(x) = (x-1) x^{s-1}$, dann haben wir die Nullstelle $1$ mit Vielfachheit eins und sonst die Nullstelle null mit Vielfachheit $s-1$. Bei einem impliziten Verfahren können wir die Parameter $\beta_0,\ldots,\beta_s$ aus einem linearen Gleichungssystem so bestimmen, dass wir die Konsistenzordnung $s+1$ (da die Matrix dieses Systemes eine Vandermonde Matrix ist, ist dieses System auch lösbar). Im expliziten Fall haben wir $s$ Parameter $\beta_0, \ldots,\beta_{s-1}$ zur Verfügung und können damit Konsistenzordnung $s$ erreichen. Wir betrachten die einfachsten Beispiele.
 %
 \begin{itemize}
 \item Für $s=1$ führt das auf die Konsistenzbedingungen

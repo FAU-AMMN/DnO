@@ -1,6 +1,6 @@
 \chapter{Numerische Lösung von Randwertproblemen} 
 
-In diesem Abschnitt wollen wir uns mit der Lösung von Randwertproblemen f\"ur lineare gew\"ohnliche Differentialgleichungen zweiter Ordnung besch\"aftigen. Diese sind von der Gestalt
+In diesem Abschnitt wollen wir uns mit der Lösung von Randwertproblemen für lineare gewöhnliche Differentialgleichungen zweiter Ordnung besch\"aftigen. Diese sind von der Gestalt
 \begin{equation}
  - u'' + p u' + q u= g  
 \end{equation}
@@ -11,7 +11,7 @@ f\"ur $x\in (0,1)$ mit Randbedingungen
 \end{align}
 Im Fall $\alpha_i = 0$ spricht man von Dirichlet-Randbedingungen, im Fall $\beta_i=0$ von Neumann-Randbedingungen. 
 
-Mit $a=e^P$, $c=e^P q$ und $f=e^P g$, wobei $P' = p$ ist, k\"onnen wir dieses Problme in einer sogenannten Divergenzform
+Mit $a=e^P$, $c=e^P q$ und $f=e^P g$, wobei $P' = p$ ist, k\"onnen wir dieses Problem in einer sogenannten Divergenzform
 \begin{equation}
 	-(au')' + c u = f \label{divergenzform}
 \end{equation}
@@ -19,10 +19,10 @@ bringen. Diese hat einige Vorteile bei  der Analyse und numerischen L\"osung. So
 $$ a(x) u'(x) = c_1 - \int_0^x f(y) ~dy $$
 und damit 
 $$ u(x) = c_2 + c_1 \int_0^x \frac{1}{a(z)}~dz - \int_0^x \frac{1}{a(z)}   \int_0^z f(y) ~dy~dz. $$
-Mit $A(x) = int_0^x \frac{1}{a(z)}~dz$ und einem Wechsel der Integrale im letzten Term erhalten wir
+Mit $A(x) = \int_0^x \frac{1}{a(z)}~dz$ und einem Wechsel der Integrale im letzten Term erhalten wir
 $$ u(x) = c_2 A(x) - \int_0^x (A(x) - A(y)) f(y)~dy. $$ 
 Die Konstanten $c_1$ und $c_2$ k\"onnen wir aus den Randbedingungen bestimmen, die ein $2 \times 2$ Gleichungssystem liefern. Wir 
-betrachten hier nur die reinen Dirichlet- oder Neumann-Randbedingungen, die gemischten Randbedingungen (genannt Robin-Bedingungen) \"uberlassen wir als \"Ubung.  
+betrachten hier nur die reinen Dirichlet- oder Neumann-Randbedingungen, die gemischten Randbedingungen (genannt Robin-Bedingungen) überlassen wir als Übung.  
 
 \subsubsection*{Dirichlet-Randbedingungen}
 
@@ -108,7 +108,7 @@ Daraus folgt sofort $u'=0$, also $u$ konstant. Ist $c$ nicht identisch null, so 
 
 Zur Diskretisierung von Randwertproblemen k\"onnen wir zun\"achst genauso vorgehen wie bei der L\"osung von Anfangswertproblemen. Wir konstruieren ein Gitter $0=x_0 < x_1 < \ldots < x_N =1$, im einfachsten Fall \"aquidistant als $x_k = kh,$ $h=\frac{1}N$, $k=0,\ldots,N$. Auf diesem Gitter approximieren wir Ableitungen durch finite Differenzen. F\"ur die zweite Ableitung in $x_k$ verwenden wir dann den (zentralen) Differenzenquotienten 
 $$ u''(x_k) \approx \frac{u(x_k+h) - 2 u(x_k) + u(x_{k}-h)}{h^2}, $$
-bzw. im nicht\"aquidistanten Fall
+bzw. im nichtäquidistanten Fall
 $$ u''(x_k) \approx \frac{1}{h_k} \left( \frac{u(x_{k+1}) -  u(x_k)}{x_{k+1}-x_k} -\frac{u(x_k)- u(x_{k-1})}{x_k - x_{k-1}} \right).$$
 Hier ist zun\"achst die Frage wie wir $h_k$ (abh\"angig von $x_{k-1}, x_k, x_{k+1}$) w\"ahlen sollen. Dies k\"onnen wir als Frage an die maximale Konsistenzordnung formulieren. F\"ur $u$ hinreichend glatt gilt per Taylor-Entwicklung
 \begin{align*}
@@ -280,13 +280,13 @@ In einer Dimension kann man wieder Ansatzfunktionen auf einem Gitter $0=x_0 < x_
 \end{align*}
 Dies ist eine Basis f\"ur die st\"uckweise linearen Funktionen \"uber diesem Gitter. Der Tr\"ager von $\phi_j$ und $\phi_k$ ist f\"ur $\vert j - k \vert > 1$ disjunkt, was noch wichtige Auswirkungen auf das sp\"ater zu l\"osende lineare System haben wird. 
 
-Die diskrete L\"osung k\"onnen wir nun als Funktion in der Form
-$$ u^h(x) = \sum{j=0}^N U_j \phi_j(x) $$
-schreiben, die unbekannten Koeffizienten $U_j$ erf\"ullen dann $U_j=u^h(x_j)$. Damit k\"onnen wir aus den Dirichlet Randwerten direkt $U_0=g_0$ und $U_N = g_1$ bestimmen, es bleibt also noch Gleichungen f\"ur $U_j$, $j=1,\ldots,N-1$ herzuleiten. Nat\"urlich k\"onnen wir die gesamte Differentialgleichung nicht als Grundlage nehmen, nicht mal bei den St\"utzstellen $x_j$, da die Funktion $u^h$ dort nicht einmal einfach differenzierbar ist. Stattdessen verwendet man die Idee der Galerkin-Diskretisierung, man projeziert die Gleichung und rechte Seite einfach in den Raum, der durch die $\phi_j$ aufgespannt wird. D.h. wir fordern statt einer linearen Gleichung $Lu = f$ nur 
+Die diskrete L\"osung können wir nun als Funktion in der Form
+$$ u^h(x) = \sum_{j=0}^N U_j \phi_j(x) $$
+schreiben, die unbekannten Koeffizienten $U_j$ erf\"ullen dann $U_j=u^h(x_j)$. Damit k\"onnen wir aus den Dirichlet Randwerten direkt $U_0=g_0$ und $U_N = g_1$ bestimmen, es bleibt also noch Gleichungen f\"ur $U_j$, $j=1,\ldots,N-1$ herzuleiten. Nat\"urlich k\"onnen wir die gesamte Differentialgleichung nicht als Grundlage nehmen, nicht mal bei den St\"utzstellen $x_j$, da die Funktion $u^h$ dort nicht einmal einfach differenzierbar ist. Stattdessen verwendet man die Idee der Galerkin-Diskretisierung, man projiziert die Gleichung und rechte Seite einfach in den Raum, der durch die $\phi_j$ aufgespannt wird. D.h. wir fordern statt einer linearen Gleichung $Lu = f$ nur 
 $$ \langle Lu, \phi \rangle = \langle f, \phi \rangle $$
 f\"ur alle $\phi \in {\cal U}_h = $lin$\{\phi_j\}_{j=1,\ldots,N-1}$. Dies liefert ein \"aquivalentes $(N-1) \times (N-1)$ System
 $$ \sum_j U_j \langle L \phi_j, \phi_i \rangle = \langle f - g_0 U_0 - g_1 U_N, \phi_i \rangle \qquad i=1,\ldots,N-1. $$
-Wir schreiben im Folgenden einfach $f$ statt $f - g_0 U_0 - g_1 U_N$, da das Dirichlet Problem mit Randdaten $g_0$, $g_1$ offensichtlich die selbe L\"osung liefert wie das homogene Dirichlet Problem mit ge\"anderter rechter Seite $f$. Wie k\"onnen wir in unserem Fall von st\"uckweise linearen Funktionen aber $\langle L\phi_j, \phi_i \rangle$ definieren, da offensichtlich $L\phi_j$ nicht wohldefiniert ist (die erste Ableitung von $\phi_j$ existiert fast \"uberall, ist aber in $x_j$ unstetig, deshalb macht die zweite Ableitungen keinen Sinn in dieser einfachen Form.) Die Antwort liefert die sogenannte schwache Formulierung des Randwertproblems. Diese erhalten wir folgenderma{\ss}en: es gilt f\"ur funktionen mit homogenen Randwerten
+Wir schreiben im Folgenden einfach $f$ statt $f - g_0 U_0 - g_1 U_N$, da das Dirichlet Problem mit Randdaten $g_0$, $g_1$ offensichtlich die selbe L\"osung liefert wie das homogene Dirichlet Problem mit ge\"anderter rechter Seite $f$. Wie k\"onnen wir in unserem Fall von st\"uckweise linearen Funktionen aber $\langle L\phi_j, \phi_i \rangle$ definieren, da offensichtlich $L\phi_j$ nicht wohldefiniert ist (die erste Ableitung von $\phi_j$ existiert fast \"uberall, ist aber in $x_j$ unstetig, deshalb macht die zweite Ableitungen keinen Sinn in dieser einfachen Form.) Die Antwort liefert die sogenannte schwache Formulierung des Randwertproblems. Diese erhalten wir folgendermaßen: es gilt für Funktionen mit homogenen Randwerten
 $$ \langle L u, \phi \rangle = \int_0^1 (Lu)(x)\phi(x)~dx = \int_0^1 (-(au')'+cu)\phi~dx = \int_0^1 a u' \phi' + cu \phi~dx =:B(u,\phi) .$$ 
 $B$ ist eine symmetrische Bilinearform, die wir auch f\"ur st\"uckweise stetig differenzierbare Funktionen \"aquivalent als
 $$ B(u,\phi) = \sum_{j=0}^{N-1} \int_{x_j}^{x_{j+1}} a u' \phi' + cu \phi~dx  $$ 
@@ -304,10 +304,10 @@ gilt.
 
 \begin{example}{}{}
 Als Beispiel berechnen wir $A$ im Fall $a=1$, $c$ konstant und $x_j = jh$. Dann gilt wegen $\phi_i'=\frac{1}h$ in $(x_{i-1},x_i)$ und $\phi_i'=-\frac{1}h$ in $(x_{i },x_{i+1})$
-$$ A_ii = \int_{x_i-h}^{x_i+h} \frac{1}{h^2}~dx + c  \int_{x_i-h}^{x_i} \left( \frac{x-x_{i}+h}h \right)^2~dx
+$$ A_{ii} = \int_{x_i-h}^{x_i+h} \frac{1}{h^2}~dx + c  \int_{x_i-h}^{x_i} \left( \frac{x-x_{i}+h}h \right)^2~dx
 + c  \int_{x_i}^{x_i+h} \left( \frac{x_{i}+h-x}h \right)^2~dx = \frac{2}h + \frac{2c}3 h. $$
 Genauso erhalten wir 
-$$ A_{ii+1}=A_{i-1i} = - \frac{1}h + c \frac{1}6 h.$$
+$$ A_{i,i+1}=A_{i-1i} = - \frac{1}h + c \frac{1}6 h.$$
 F\"ur $h < \sqrt{\frac{c}6}$ ist $A$ wieder eine M-Matrix und wir k\"onnen die Theorie aus dem letzten Abschnitt anwenden. Allgemeiner k\"onnen wir aber eine Theorie basierend auf der Bilinearform $B$ konstruieren. 
 \end{example}
 
@@ -328,7 +328,7 @@ $$ \Vert \tilde u - u_h \Vert_B^2 =  B(\tilde u - u_h, \tilde u - u_h)=  B(\tild
 und damit 
 $$ \Vert \tilde u - u_h \Vert_B \leq \Vert \tilde u - \tilde u_h \Vert_B. $$ 
 Die rechte Seite k\"onnen wir durch den Interpolationsfehler absch\"atzen, es gilt 
-$$ \tilde u - \tilde u_h \Vert_B^2 \leq \max\{\Vert a\Vert_\infty, \Vert c \Vert_\infty\} \int_0^1 ( \tilde u' - \tilde u_h')^2 + 
+$$\Vert\tilde u - \tilde u_h \Vert_B^2 \leq \max\{\Vert a\Vert_\infty, \Vert c \Vert_\infty\} \int_0^1 ( \tilde u' - \tilde u_h')^2 + 
  ( \tilde u - \tilde u_h)^2~dx $$
 Durch eine einfache Taylorentwicklung und Ausnutzung von $\tilde u \in C^2$ erhalten wir dann 
 $$  \int_0^1 ( \tilde u' - \tilde u_h')^2 + 
